@@ -4,14 +4,16 @@ import jakarta.persistence.Table;
 
 package com.example.SpendSight.Modelos;
 //id, nombre, fechaCreacion, responsable, justificacion
-@ManyToMany(mappedBy = "categorias")
-private Set<Comercio> comercios = new HashSet<>();
 @Entity
 @Table(name = "categorias")
 public class Categoria {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     private String nombre;
+    private String descripcion;
     private String icono;
     private String color;
     private String estado;
@@ -19,8 +21,11 @@ public class Categoria {
     private String fechaCreacion;
     private String fechaModificacion;
     private String usuarioCreacion;
-    private String usuarioModificacion;
-}
+    private String usuarioModificacion;}
+
+    // Relación muchos a muchos con Comercio
+    @ManyToMany(mappedBy = "categorias")
+    private Set<Comercio> comercios = new HashSet<>();
     public Categoria() {
     }
 

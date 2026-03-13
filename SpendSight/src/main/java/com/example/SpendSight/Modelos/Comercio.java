@@ -9,12 +9,10 @@ package com.example.SpendSight.Modelos;
 /**
  * id,nit,nombre,actividad,contacto(correo),telefono,direccion,ciudad,pais,tipo(comercio/servicio)
  */
-@Entity
-@Table(name = "comercios")
-public class Comercio {
-
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String nit;
     private String nombre;
     private String actividad;
@@ -24,7 +22,15 @@ public class Comercio {
     private String ciudad;
     private String pais;
     private String tipo;
-}
+
+    // Relación muchos a muchos con Categoria
+    @ManyToMany
+    @JoinTable(
+        name = "comercio_categoria", // tabla intermedia
+        joinColumns = @JoinColumn(name = "comercio_id"), // FK hacia Comercio
+        inverseJoinColumns = @JoinColumn(name = "categoria_id") // FK hacia Categoria
+    )
+    private Set<Categoria> categorias = new HashSet<>();
     public Comercio() {
     }
 
