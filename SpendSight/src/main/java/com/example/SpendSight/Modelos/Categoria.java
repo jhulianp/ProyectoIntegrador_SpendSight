@@ -4,7 +4,8 @@ import jakarta.persistence.Table;
 
 package com.example.SpendSight.Modelos;
 //id, nombre, fechaCreacion, responsable, justificacion
-
+@ManyToMany(mappedBy = "categorias")
+private Set<Comercio> comercios = new HashSet<>();
 @Entity
 @Table(name = "categorias")
 public class Categoria {
