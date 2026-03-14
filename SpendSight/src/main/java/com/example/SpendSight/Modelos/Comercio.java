@@ -1,10 +1,15 @@
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-
 package com.example.SpendSight.Modelos;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import com.example.SpendSight.Modelos.utils.TipoComercio;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 
 /**
  * id,nit,nombre,actividad,contacto(correo),telefono,direccion,ciudad,pais,tipo(comercio/servicio)
@@ -14,22 +19,37 @@ package com.example.SpendSight.Modelos;
 public class Comercio {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private Long id;
+    @Column(name = "nit", nullable = false, length = 20)
     private String nit;
+    @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
+    @Column(name = "actividad", nullable = true, length = 100)
     private String actividad;
+    @Column(name = "contacto", nullable = true, length = 100)
     private String contacto;
+    @Column(name = "telefono", nullable = true, length = 20)
     private String telefono;
+    @Column(name = "direccion", nullable = true, length = 200)
     private String direccion;
+    @Column(name = "ciudad", nullable = true, length = 50)
     private String ciudad;
+    @Column(name = "pais", nullable = true, length = 50)
     private String pais;
-    private String tipo;
-}
+    @Column(name = "tipo", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TipoComercio tipo;
+    @ManyToOne
+    @JoinColumn(name = "fk_gasto", referencedColumnName = "id")
+    private Gasto gasto;
+
     public Comercio() {
     }
 
     public Comercio(Long id, String nit, String nombre, String actividad, String contacto,
-                    String telefono, String direccion, String ciudad, String pais, String tipo) {
+                    String telefono, String direccion, String ciudad, String pais, TipoComercio tipo) {
         this.id = id;
         this.nit = nit;
         this.nombre = nombre;
@@ -114,10 +134,19 @@ public class Comercio {
         this.pais = pais;
     }
 
-    public String getTipo() {
+    public TipoComercio getTipo() {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
+    public void setTipo(TipoComercio tipo) {
         this.tipo = tipo;
     }
+
+    public Gasto getGasto() {
+        return gasto;
+    }
+
+    public void setGasto(Gasto gasto) {
+        this.gasto = gasto;
+    }
+}
