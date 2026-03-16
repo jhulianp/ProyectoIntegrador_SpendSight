@@ -11,7 +11,6 @@ import com.example.SpendSight.Modelos.utils.EstadoCategoria;
 import com.example.SpendSight.Modelos.utils.TipoCategoria;
 
 //id, nombre, fechaCreacion, responsable, justificacion
-
 @Entity
 @Table(name = "categorias")
 public class Categoria {
@@ -88,6 +87,8 @@ public class Categoria {
         return icono;
     }
 
+
+    
     public void setIcono(String icono) {
         this.icono = icono;
     }
