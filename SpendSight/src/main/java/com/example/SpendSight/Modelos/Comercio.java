@@ -30,9 +30,9 @@ public class Comercio {
     private String actividad;
     @Column(name = "contacto", nullable = true, length = 100)
     private String contacto;
-    @Column(name = "telefono", nullable = true, length = 20)
+    @Column(name = "telefono", nullable = true, length = 40)
     private String telefono;
-    @Column(name = "direccion", nullable = true, length = 200)
+    @Column(name = "direccion", nullable = true, length = 250)
     private String direccion;
     @Column(name = "ciudad", nullable = true, length = 50)
     private String ciudad;

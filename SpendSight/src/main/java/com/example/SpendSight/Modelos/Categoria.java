@@ -11,19 +11,18 @@ import com.example.SpendSight.Modelos.utils.EstadoCategoria;
 import com.example.SpendSight.Modelos.utils.TipoCategoria;
 
 //id, nombre, fechaCreacion, responsable, justificacion
-
 @Entity
 @Table(name = "categorias")
 public class Categoria {
     @Id
     private int id;
-    @Column(name = "nombre", nullable = false, length = 50)
+    @Column(name = "nombre", nullable = false, length = 40)
     private String nombre;
     @Column(name = "descripcion", nullable = true, length = 255)
     private String descripcion;
     @Column(name = "icono", nullable = true, length = 100)
     private String icono;
-    @Column(name = "color", nullable = true, length = 20)
+    @Column(name = "color", nullable = true, length = 30)
     private String color;
     @Column(name = "estado", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -31,7 +30,7 @@ public class Categoria {
     @Column(name = "tipo", nullable = false)
     @Enumerated(EnumType.STRING)
     private TipoCategoria tipo;
-    @Column(name = "fecha_creacion", nullable = false, length = 20)
+    @Column(name = "fecha_creacion", nullable = false, length = 30)
     private String fechaCreacion;
     @Column(name = "fecha_modificacion", nullable = true, length = 20)
     private String fechaModificacion;
@@ -88,6 +87,8 @@ public class Categoria {
         return icono;
     }
 
+
+    
     public void setIcono(String icono) {
         this.icono = icono;
     }
