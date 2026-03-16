@@ -1,35 +1,64 @@
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
 package com.example.SpendSight.Modelos;
+import com.example.SpendSight.Modelos.utils.TipoDocumento;
+import java.util.List;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import com.example.SpendSight.Modelos.utils.EstadoUsuario;
 
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
     @Id
     private int id;
+    
+    @Column(name = "nombres", nullable = false, unique = false, length = 50)
     private String nombres;
-    private String tipoDocumento;
+    @Column(name = "tipo_documento", nullable = false, unique = false)
+    @Enumerated(EnumType.STRING)
+    private TipoDocumento tipoDocumento;
+    @Column(name = "documento", nullable = false, unique = true, length = 20)
     private String documento;
+    @Column(name = "edad", nullable = false, unique = false, length = 3)
     private int edad;
+    @Column(name = "correo", nullable = false, unique = true, length = 50)
     private String correo;
+    @Column(name = "telefono", nullable = false, unique = false, length = 20)
     private String telefono;
+    @Column(name = "direccion", nullable = false, unique = false, length = 100)
     private String direccion;
+    @Column(name = "ciudad", nullable = false, unique = false, length = 50)
     private String ciudad;
+    @Column(name = "pais", nullable = false, unique = false, length = 50)
     private String pais;
-    private String estado;
-}
+    @Column(name = "estado", nullable = false, unique = false)
+    @Enumerated(EnumType.STRING)
+    private EstadoUsuario estado;
+
+    //Creando una relacion con el modelo de gasto
+
+    //Yo como usuario me relaciono con muchos gastos
+    @OneToMany(mappedBy = "usuario")
+    private List<Gasto> gastos;
+
+    //Yo como usuario me relaciono con muchos medios de pago
+    @OneToMany(mappedBy = "usuario")
+    private List<MedioPago> mediosPago;
+
     public Usuario() {
     }
 
     public Usuario(int id, String nombres, String tipoDocumento, String documento,
-                   int edad, String correo, String telefono,
-                   String direccion, String ciudad, String pais, String estado) {
+                int edad, String correo, String telefono,
+                String direccion, String ciudad, String pais, EstadoUsuario estado) {
         this.id = id;
         this.nombres = nombres;
-        this.tipoDocumento = tipoDocumento;
+        this.tipoDocumento = TipoDocumento.valueOf(tipoDocumento);
         this.documento = documento;
         this.edad = edad;
         this.correo = correo;
@@ -56,11 +85,11 @@ public class Usuario {
         this.nombres = nombres;
     }
 
-    public String getTipoDocumento() {
+    public TipoDocumento getTipoDocumento() {
         return tipoDocumento;
     }
 
-    public void setTipoDocumento(String tipoDocumento) {
+    public void setTipoDocumento(TipoDocumento tipoDocumento) {
         this.tipoDocumento = tipoDocumento;
     }
 
@@ -120,10 +149,11 @@ public class Usuario {
         this.pais = pais;
     }
 
-    public String getEstado() {
+    public EstadoUsuario getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(EstadoUsuario estado) {
         this.estado = estado;
     }
+}
