@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de gasto</title>
+    <link rel="stylesheet" href="/SpendSight/src/main/resources/static/css/registroGasto.css">
+    <link rel="stylesheet" href="/SpendSight/src/main/resources/static/css/menu.css">
+</head>
+<body>
+  <button id="toggleMenu">☰ </button>
+  <div id="overlay" class="overlay"></div>
+  <nav id="sidebar" class="sidebar">
+    <h2>Gastos Hormiga</h2>
+    <ul>
+      <li><a href="/SpendSight/src/main/resources/static/assets/ResgistroGastos.html">Registrar</a></li>
+      <li><a href="/SpendSight/src/main/resources/static/assets/RevisarGastos.html">Listar</a></li>
+    </ul>
+    <button class="logout">Cerrar Sesión</button>
+  </nav>
+
+    <section id="contenedor">
+        <div id="subSection">
+             <br>
+            <h3>Fecha</h3>
+            <input type="date" name="fecha" id="fechaGasto" >
+        </div>
+
+        <div id="subSection">
+            <h3>Nombre</h3>
+            <input type="text" id="nombre" placeholder="cafe">
+        </div>
+
+        <div id="subSection">
+            <h3>categoria</h3>
+            <select name="categoria" id="categoria" >
+                <option value="Comida">Comida y vevida</option>
+                <option value="Videojuegos">Videojuegos</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Supcripcion">Subcripcion</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Servicio">Servicio</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+        <div id="subSection">
+            <h3>costo</h3>
+            <input type="number" name="costo" id="costo" placeholder="$ 0.00">
+        </div>
+        <div id="subSection">
+            <h3>descripcion</h3>
+        <input type="text" id="descripcion" placeholder=" descripcion">
+        </div>
+
+        <button id="button">Guardar</button>
+        <script src="/SpendSight/src/main/resources/static/js/menuScript.js"></script>
+        <script src="/SpendSight/src/main/resources/static/js/scriptRG.js"></script>
+    </section>
+</body>
