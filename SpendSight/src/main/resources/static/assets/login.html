@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Gastos Hormigas</title>
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Formulario de Login -->
+        <form class="login-form" id="loginForm">
+            <div class="icon-container">
+                <div class="icon-circle">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#111827"/><path d="M8 17V15.5C8 14.1193 9.11929 13 10.5 13H13.5C14.8807 13 16 14.1193 16 15.5V17" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="7" width="8" height="5" rx="2.5" stroke="#fff" stroke-width="1.5"/></svg>
+                </div>
+            </div>
+            <h1 class="brand" style="margin-bottom:0.2rem;">Gastos Hormigas</h1>
+            <div class="subtitle">Inicia sesión en tu cuenta</div>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="tu@email.com" required autocomplete="username">
+            </div>
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" placeholder="********" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="login-btn">Iniciar Sesión</button>
+            <div class="register-link">
+                ¿No tienes cuenta? <a href="#" id="showRegister">Regístrate</a>
+            </div>
+        </form>
+        <!-- Formulario de Registro -->
+        <form class="login-form" id="registerForm" style="display:none;">
+            <div class="icon-container">
+                <div class="icon-circle">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#111827"/><path d="M8 17V15.5C8 14.1193 9.11929 13 10.5 13H13.5C14.8807 13 16 14.1193 16 15.5V17" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="7" width="8" height="5" rx="2.5" stroke="#fff" stroke-width="1.5"/></svg>
+                </div>
+            </div>
+            <h1 class="brand" style="margin-bottom:0.2rem;">Gastos Hormigas</h1>
+            <div class="subtitle">Crea una nueva cuenta</div>
+            <div class="input-group">
+                <label for="registerName">Nombre</label>
+                <input type="text" id="registerName" name="registerName" placeholder="Tu nombre" required>
+            </div>
+            <div class="input-group">
+                <label for="registerEmail">Email</label>
+                <input type="email" id="registerEmail" name="registerEmail" placeholder="tu@email.com" required>
+            </div>
+            <div class="input-group">
+                <label for="registerPassword">Contraseña</label>
+                <input type="password" id="registerPassword" name="registerPassword" placeholder="********" required>
+            </div>
+            <button type="submit" class="login-btn">Crear Cuenta</button>
+            <div class="register-link">
+                ¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión</a>
+            </div>
+        </form>
+        <footer>
+        </footer>
+    </div>
+    <script src="../js/login.js"></script>
+</body>
+</html>
