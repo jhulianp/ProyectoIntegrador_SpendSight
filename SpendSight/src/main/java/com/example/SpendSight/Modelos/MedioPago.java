@@ -1,28 +1,41 @@
+package com.example.SpendSight.Modelos;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
-package com.example.SpendSight.Modelos;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import com.example.SpendSight.Modelos.utils.EstadoMedioPago;
 
 @Entity
 @Table(name = "medios_pago")
 public class MedioPago {
 
     @Id
+    @Column(name = "id", nullable = false)
     private int id;
+    @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
+    @Column(name = "franquicia", nullable = true, length = 50)
     private String franquicia;
-    private String estado;
-}
+    @Column(name = "estado", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private EstadoMedioPago estado;
+    @ManyToOne
+    @JoinColumn(name = "fk_usuario", referencedColumnName = "id")
+    private Usuario usuario;
+
     public MedioPago() {
     }
 
-    public MedioPago(int id, String nombre, String franquicia, String estado) {
+    public MedioPago(int id, String nombre, String franquicia, EstadoMedioPago estado, Usuario usuario) {
         this.id = id;
         this.nombre = nombre;
         this.franquicia = franquicia;
         this.estado = estado;
+        this.usuario = usuario;
     }
 
     public int getId() {
@@ -49,10 +62,19 @@ public class MedioPago {
         this.franquicia = franquicia;
     }
 
-    public String getEstado() {
+    public EstadoMedioPago getEstado() {
         return estado;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(EstadoMedioPago estado) {
         this.estado = estado;
     }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+}
