@@ -1,4 +1,4 @@
-package com.example.SpendSight.Modelos.repositorio;
+package com.example.SpendSight.repositorios;
 import java.util.List;
 import java.util.Optional;
 
