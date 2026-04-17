@@ -1,7 +1,13 @@
-package com.example.SpendSight.Gasto;
+package com.example.SpendSight.servicios;
+
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import com.example.SpendSight.repositorios.IUsuarioRepositorio;
+import org.springframework.web.server.ResponseStatusException;
+
+import com.example.SpendSight.Modelos.Gasto;
+import com.example.SpendSight.repositorios.IGastoRepositorio;
 @Service
 public class GastoServicio {
     //Inyectando la dependencia al repositorio Gasto------------------------------------------------------------------
@@ -31,5 +37,47 @@ public class GastoServicio {
     //funciona para listar todos los gastos----------------------------------------------------------------------------
     public List<Gasto> listarGastos() {
         return repositorio.findAll();
+    }
+
+    //funcion para eliminar un Gasto----------------------------------------------------------------------------------
+    public void eliminarGasto(Integer id) {
+        if (!repositorio.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gasto no encontrado");
+        }
+        repositorio.deleteById(id);
+    }
+
+    //funcion para modificar un Gasto---------------------------------------------------------------------------------
+    public Gasto modificarGasto(Gasto gasto) {
+        if (gasto.getId() == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID del gasto es obligatorio para modificar");
+        }
+        if (gasto.getDescripcion() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La descripcion no puede estar vacia");
+        }
+        if (gasto.getValor() == null || gasto.getValor().length() == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El valor debe ser mayor a cero");
+        }
+        if (gasto.getFecha() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha no puede ser futura");
+        }
+        if (gasto.getMedioPago() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El medio de pago no puede estar vacio");
+        }
+        if (gasto.getCategoria() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La categoria no puede estar vacia");
+        }
+        if (gasto.getComercio() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El comercio no puede estar vacio");
+        }
+        if (gasto.getEstado() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado no puede estar vacio");
+        }
+        return repositorio.save(gasto);
+    }
+
+    //funcion para buscar un Gasto por su id--------------------------------------------------------------------------
+    public Gasto buscarGastoPorId(Integer id) {
+        return repositorio.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gasto no encontrado"));
     }
 }

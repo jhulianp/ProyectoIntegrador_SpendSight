@@ -1,4 +1,4 @@
-package com.example.SpendSight.Modelos.Servicios;
+package com.example.SpendSight.servicios;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.SpendSight.Modelos.Usuario;
-import com.example.SpendSight.Modelos.repositorio.IUsuarioRepositorio;
+import com.example.SpendSight.repositorios.IUsuarioRepositorio;
 
 @Service
 public class UsuarioServicio {
