@@ -22,8 +22,6 @@ public class Categoria {
     private String descripcion;
     @Column(name = "icono", nullable = true, length = 100)
     private String icono;
-    @Column(name = "color", nullable = true, length = 30)
-    private String color;
     @Column(name = "estado", nullable = false)
     @Enumerated(EnumType.STRING)
     private EstadoCategoria estado;
@@ -45,12 +43,11 @@ public class Categoria {
     public Categoria() {
     }
 
-    public Categoria(int id, String nombre, String descripcion, String icono, String color, EstadoCategoria estado, TipoCategoria tipo, String fechaCreacion, String fechaModificacion, String usuarioCreacion, String usuarioModificacion) {
+    public Categoria(int id, String nombre, String descripcion, String icono, EstadoCategoria estado, TipoCategoria tipo, String fechaCreacion, String fechaModificacion, String usuarioCreacion, String usuarioModificacion) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.icono = icono;
-        this.color = color;
         this.estado = estado;
         this.tipo = tipo;
         this.fechaCreacion = fechaCreacion;
@@ -93,13 +90,6 @@ public class Categoria {
         this.icono = icono;
     }
 
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
 
     public EstadoCategoria getEstado() {
         return estado;
