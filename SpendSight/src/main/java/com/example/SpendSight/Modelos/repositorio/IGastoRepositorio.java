@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.example.SpendSight.modelos.Gasto;
-import com.example.SpendSight.modelos.utils.;
+import com.example.SpendSight.modelos.utils;
 @Repository
 public interface IGastoRepositorio extends JpaRepository<Gasto,Integer> {
     //considero una consulta personalizada POR AHORA COMO UNA BUSQUEDA

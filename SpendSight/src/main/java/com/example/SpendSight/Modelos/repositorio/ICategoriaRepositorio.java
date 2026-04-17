@@ -8,11 +8,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.SpendSight.Modelos.Categoria;
 
 public interface ICategoriaRepositorio  extends JpaRepository<Category,Integer>{
-    List<Categoria> findByNombre() ;
-    List<Categoria> findByDescripcion();
-    List<Categoria> findByFechaCreacion();
-    List<Categoria> findByFechaModificacion();
-    List<Categoria> findByUsuarioCreacion();
- 
-    List<Categoria> findByTipo();
+    List<Categoria> findByNombre(String nombre) ;
+    List<Categoria> findByDescripcion(String descripcion);
+    List<Categoria> findByFechaCreacion(String fechaCreacion);
+    List<Categoria> findByFechaModificacion(String fechaModificacion);
+    List<Categoria> findByUsuarioCreacion(String usuarioCreacion);
+    List<Categoria> findByTipo(String tipo);
 }
