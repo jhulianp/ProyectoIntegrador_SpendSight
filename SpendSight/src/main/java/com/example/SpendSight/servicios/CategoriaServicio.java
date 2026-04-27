@@ -37,4 +37,14 @@ public class CategoriaServicio {
     public list<Categoria> listarCategoria(){
         return repositorio.findAll();
     }
+    public void eliminar_Categoria(Integer id) {
+    if (!repositorio.existsById(id)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria no encontrado");
+    }
+        repositorio.deleteById(id);
+    }
+
+    public Categoria buscar_categoria_por_id(Integer id) {
+        return repositorio.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "categoria no encontrado"));
+    }
 }

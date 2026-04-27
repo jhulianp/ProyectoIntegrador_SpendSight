@@ -9,7 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.SpendSight.Modelos.Comercio;
 import com.example.SpendSight.Modelos.repositorio.IcomercioRepositorio;
 @Service
-public class comercioServicio {
+public class ComercioServicio {
     @Autowired
     private IcomercioRepositorio repositorio;
 
@@ -39,5 +39,14 @@ public class comercioServicio {
         public List<Comercio> listarComercios() {
         return repositorio.findAll();
     }
+        public void eliminar_Comercio(Integer id) {
+        if (!repositorio.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Comercio no encontrado");
+        }
+        repositorio.deleteById(id);
+    }
 
+    public Comercio buscar_comercio_por_id(Integer id) {
+        return repositorio.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "comercio no encontrado"));
+    }
 }
