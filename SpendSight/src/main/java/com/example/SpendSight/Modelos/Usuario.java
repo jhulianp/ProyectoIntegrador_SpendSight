@@ -53,12 +53,12 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(int id, String nombres, String tipoDocumento, String documento,
+    public Usuario(int id, String nombres, TipoDocumento tipoDocumento, String documento,
                 int edad, String correo, String telefono,
                 String direccion, String ciudad, String pais, EstadoUsuario estado) {
         this.id = id;
         this.nombres = nombres;
-        this.tipoDocumento = TipoDocumento.valueOf(tipoDocumento);
+        this.tipoDocumento = tipoDocumento;
         this.documento = documento;
         this.edad = edad;
         this.correo = correo;
