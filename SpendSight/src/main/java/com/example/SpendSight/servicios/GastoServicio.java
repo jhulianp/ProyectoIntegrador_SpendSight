@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import com.example.SpendSight.Modelos.Gasto;
 import com.example.SpendSight.repositorios.IGastoRepositorio;
+import java.util.Optional;
 @Service
 public class GastoServicio {
     //Inyectando la dependencia al repositorio Gasto------------------------------------------------------------------
@@ -28,26 +29,47 @@ public class GastoServicio {
         //si la validacion es correcta, se guarda el gasto-------------------------------------------------------------
         return repositorio.save(datosGasto);
     }
-    //funciona para listar todos los gastos----------------------------------------------------------------------------
+
+    //funcion para listar todos los gastos----------------------------------------------------------------------------
     public List<Gasto> listarGastos() {
         return repositorio.findAll();
     }
+    //funcion para modificar un gasto en bd---------------------------------------------------------------------------
+    public Gasto modificar_gasto(Integer id, Gasto datosNuevos) {
+        Optional<Gasto> gasto_buscado = repositorio.findById(id);
+        if (gasto_buscado.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Gasto no encontrado");
+        }else{
+            Gasto gasto_encontrado = gasto_buscado.get();
+            //modifiquemos datos 
+            gasto_encontrado.setDescripcion(datosNuevos.getDescripcion());
+            gasto_encontrado.setValor(datosNuevos.getValor());
+            gasto_encontrado.setFecha(datosNuevos.getFecha());
+            gasto_encontrado.setMedioPago(datosNuevos.getMedioPago());
+            gasto_encontrado.setCategoria(datosNuevos.getCategoria());
+            return repositorio.save(gasto_encontrado);
+        }
+    }
+
     //servicio para eliminar un gasto en bd----------------------------------------------------------------------------
-    public void eliminar_gasto(Integer id) {
-        if (!repositorio.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gasto no encontrado");
+    public boolean eliminar_gasto(Integer id) {
+        Optional<Gasto> gasto_buscado = repositorio.findById(id);
+        if (gasto_buscado.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Gasto no encontrado");
+        }else{
+            repositorio.deleteById(id);
+            return true;
         }
-        repositorio.deleteById(id);
+        
     }
-    //servicio para modificar un gasto en bd---------------------------------------------------------------------------
-    public Gasto modificar_gasto(Gasto gasto) {
-        if (gasto.getId() == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID del gasto es obligatorio para modificar");
-        }
-        return repositorio.save(gasto);
-    }
+
     //servicio para buscar un gasto por id en bd-----------------------------------------------------------------------
     public Gasto buscar_gasto_por_id(Integer id) {
-        return repositorio.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gasto no encontrado"));
+        Optional<Gasto> gasto_buscado = repositorio.findById(id);
+        if (gasto_buscado.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Gasto no encontrado");
+        }else{
+            return gasto_buscado.get();
+        }
     }
 }
