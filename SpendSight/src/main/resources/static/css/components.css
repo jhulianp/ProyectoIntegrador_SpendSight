@@ -2,6 +2,11 @@
    COMPONENTS.CSS — Botones, formularios, tablas,
                     modales, toasts, confirm dialog
    ===================================================== */
+<<<<<<< HEAD
+=======
+
+/* ── Buttons ── */
+>>>>>>> feature/medio-pago
 .btn {
   padding: 9px 18px;
   border-radius: var(--radius-md);
@@ -115,7 +120,11 @@
   background: #fff;
 }
 
+<<<<<<< HEAD
 
+=======
+/* ── Table ── */
+>>>>>>> feature/medio-pago
 .table-wrap {
   background: var(--card);
   border: 1px solid var(--border);
@@ -178,6 +187,10 @@ tbody tr:hover { background: rgba(124,106,255,.04); }
 tbody tr:last-child td { border-bottom: none; }
 .actions { display: flex; gap: 5px; }
 
+<<<<<<< HEAD
+=======
+/* ── Modal ── */
+>>>>>>> feature/medio-pago
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -236,6 +249,10 @@ tbody tr:last-child td { border-bottom: none; }
   border-top: 1px solid var(--border);
 }
 
+<<<<<<< HEAD
+=======
+/* ── Detail panel ── */
+>>>>>>> feature/medio-pago
 .detail-overlay {
   position: fixed;
   inset: 0;
@@ -274,7 +291,11 @@ tbody tr:last-child td { border-bottom: none; }
 .detail-value { font-size: 14px; color: var(--text); }
 .detail-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
 
+<<<<<<< HEAD
 
+=======
+/* ── Confirm dialog ── */
+>>>>>>> feature/medio-pago
 .confirm-overlay {
   position: fixed;
   inset: 0;
@@ -301,6 +322,10 @@ tbody tr:last-child td { border-bottom: none; }
 .confirm-msg   { color: var(--text2); font-size: 13px; margin-bottom: 22px; line-height: 1.5; }
 .confirm-btns  { display: flex; gap: 10px; justify-content: center; }
 
+<<<<<<< HEAD
+=======
+/* ── Toast ── */
+>>>>>>> feature/medio-pago
 .toast-container {
   position: fixed;
   bottom: 22px;
