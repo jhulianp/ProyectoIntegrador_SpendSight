@@ -28,6 +28,7 @@ export default function ConfigPage() {
     () => (session ? `ss_config_${session.email || session.id}` : 'ss_config'),
     [session]
   );
+  const suffix = useMemo(() => (session ? `_${session.email || session.id}` : null), [session]); // Change to null if no session
   const passKey = useMemo(
     () => (session ? `ss_pass_${session.email || session.id}` : 'ss_pass'),
     [session]
@@ -54,10 +55,10 @@ export default function ConfigPage() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const gastos = useMemo(() => loadStorage('ss_gastos', []), []);
-  const totalGastos = gastos.reduce((sum, gasto) => sum + (Number(gasto.valor) || 0), 0);
-  const comercios = useMemo(() => loadStorage('ss_comercios', []), []);
-  const categorias = useMemo(() => loadStorage('ss_categorias', []), []);
+  const gastos = useMemo(() => (suffix !== null ? loadStorage(`ss_gastos${suffix}`, []) : []), [suffix]);
+  const totalGastos = suffix !== null ? gastos.reduce((sum, gasto) => sum + (Number(gasto.valor) || 0), 0) : 0;
+  const comercios = suffix !== null ? useMemo(() => loadStorage(`ss_comercios${suffix}`, []), [suffix]) : [];
+  const categorias = suffix !== null ? useMemo(() => loadStorage(`ss_categorias${suffix}`, []), [suffix]) : [];
 
   const updateField = (key, value) => setConfig((prev) => ({ ...prev, [key]: value }));
 
@@ -120,13 +121,16 @@ export default function ConfigPage() {
   };
 
   const clearAllData = () => {
-    window.localStorage.removeItem('ss_gastos');
-    window.localStorage.removeItem('ss_categorias');
-    window.localStorage.removeItem('ss_comercios');
-    window.localStorage.removeItem('ss_config');
-    window.localStorage.removeItem(configKey);
-    window.localStorage.removeItem('ss_pass');
-    window.localStorage.removeItem(passKey);
+    if (suffix !== null) { // Only clear user-specific data if a session exists
+      window.localStorage.removeItem(`ss_gastos${suffix}`);
+      window.localStorage.removeItem(`ss_categorias${suffix}`);
+      window.localStorage.removeItem(`ss_comercios${suffix}`);
+      window.localStorage.removeItem(configKey); // User-specific config
+      window.localStorage.removeItem(passKey); // User-specific password
+    }
+    // These are generic and might be cleared or left depending on desired behavior
+    // window.localStorage.removeItem('ss_config'); // This might be a generic default config
+    // window.localStorage.removeItem('ss_pass'); // This might be a generic default password
     setConfig(DEFAULT_CONFIG);
     setToast({ message: 'Todos los datos eliminados', variant: 'info' });
   };

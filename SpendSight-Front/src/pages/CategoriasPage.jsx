@@ -26,16 +26,21 @@ export default function CategoriasPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [confirm, setConfirm] = useState({ open: false, id: null });
+  
+  const session = useMemo(() => JSON.parse(localStorage.getItem('ss_session') || 'null'), []);
+  const suffix = useMemo(() => (session ? `_${session.email || session.id}` : null), [session]);
 
   useEffect(() => {
-    const stored = loadStorage('ss_categorias', []);
-    if (stored.length) {
-      setCategories(stored);
-      return;
-    }
-    setCategories(DEFAULT_CATEGORIES);
-    saveStorage('ss_categorias', DEFAULT_CATEGORIES);
-  }, []);
+    if (suffix !== null) {
+      const stored = loadStorage(`ss_categorias${suffix}`, []);
+      if (stored.length) {
+        setCategories(stored);
+      } else {
+        setCategories(DEFAULT_CATEGORIES); // Default categories for new users
+        saveStorage(`ss_categorias${suffix}`, DEFAULT_CATEGORIES);
+      }
+    } else setCategories([]); // Clear if no session
+  }, [suffix]);
 
   useEffect(() => {
     if (!toast) return;
@@ -43,7 +48,7 @@ export default function CategoriasPage() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const gastos = useMemo(() => loadStorage('ss_gastos', []), []);
+  const gastos = useMemo(() => (suffix !== null ? loadStorage(`ss_gastos${suffix}`, []) : []), [suffix]);
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return categories.filter((categoria) => categoria.nombre.toLowerCase().includes(term));
@@ -55,6 +60,7 @@ export default function CategoriasPage() {
     } else {
       setForm(EMPTY_FORM);
     }
+    setConfirm({ open: false, id: null }); // Ensure confirmation modal is closed
     setIsModalOpen(true);
   };
 
@@ -82,18 +88,19 @@ export default function CategoriasPage() {
     }
 
     setCategories(next);
-    saveStorage('ss_categorias', next);
+    saveStorage(`ss_categorias${suffix}`, next);
     closeModal();
   };
 
   const handleDelete = (id) => {
     setConfirm({ open: true, id });
-  };
+    setIsModalOpen(false);
+  }; 
 
   const confirmDelete = () => {
     const next = categories.filter((categoria) => categoria.id !== confirm.id);
     setCategories(next);
-    saveStorage('ss_categorias', next);
+    saveStorage(`ss_categorias${suffix}`, next);
     setConfirm({ open: false, id: null });
     setToast({ message: 'Categoria eliminada', variant: 'info' });
   };
@@ -197,92 +204,96 @@ export default function CategoriasPage() {
         </table>
       </div>
 
-      <div className={`modal-overlay${isModalOpen ? ' open' : ''}`}>
-        <div className="modal">
-          <div className="modal-title">
-            <span>{form.id ? 'Editar Categoria' : 'Nueva Categoria'}</span>
-            <button className="modal-close" onClick={closeModal}>×</button>
-          </div>
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">
+              <span>{form.id ? 'Editar Categoria' : 'Nueva Categoria'}</span>
+              <button className="modal-close" onClick={closeModal}>×</button>
+            </div>
 
-          <div className="form-row">
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Nombre *</label>
+                <input className="form-input" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Alimentacion" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Tipo</label>
+                <select className="form-select" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
+                  <option>Gasto</option>
+                  <option>Ingreso</option>
+                </select>
+              </div>
+            </div>
+
             <div className="form-group">
-              <label className="form-label">Nombre *</label>
-              <input className="form-input" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Alimentacion" />
+              <label className="form-label">Icono (letra clave)</label>
+              <div className="icon-picker-row">
+                {DEFAULT_ICONS.map((icono) => (
+                  <button
+                    type="button"
+                    key={icono}
+                    className={`icon-btn${form.icono === icono ? ' selected' : ''}`}
+                    onClick={() => setForm({ ...form, icono })}
+                    title={icono}
+                  >
+                    {icono}
+                  </button>
+                ))}
+              </div>
             </div>
+
             <div className="form-group">
-              <label className="form-label">Tipo</label>
-              <select className="form-select" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
-                <option>Gasto</option>
-                <option>Ingreso</option>
-              </select>
+              <label className="form-label">Color</label>
+              <div className="color-picker-row">
+                {DEFAULT_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    className={`color-swatch${form.color === color ? ' selected' : ''}`}
+                    style={{ background: color }}
+                    onClick={() => setForm({ ...form, color })}
+                    title={color}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="form-group">
-            <label className="form-label">Icono (letra clave)</label>
-            <div className="icon-picker-row">
-              {DEFAULT_ICONS.map((icono) => (
-                <button
-                  type="button"
-                  key={icono}
-                  className={`icon-btn${form.icono === icono ? ' selected' : ''}`}
-                  onClick={() => setForm({ ...form, icono })}
-                  title={icono}
-                >
-                  {icono}
-                </button>
-              ))}
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Estado</label>
+                <select className="form-select" value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })}>
+                  <option>Activo</option>
+                  <option>Inactivo</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Id</label>
+                <input className="form-input" value={form.id || ''} disabled placeholder="Automático" />
+              </div>
             </div>
-          </div>
 
-          <div className="form-group">
-            <label className="form-label">Color</label>
-            <div className="color-picker-row">
-              {DEFAULT_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  className={`color-swatch${form.color === color ? ' selected' : ''}`}
-                  style={{ background: color }}
-                  onClick={() => setForm({ ...form, color })}
-                  title={color}
-                />
-              ))}
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={closeModal}>Cancelar</button>
+              <button className="btn btn-primary" onClick={handleSave}>Guardar</button>
             </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Estado</label>
-              <select className="form-select" value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })}>
-                <option>Activo</option>
-                <option>Inactivo</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Id</label>
-              <input className="form-input" value={form.id || ''} disabled placeholder="Automático" />
-            </div>
-          </div>
-
-          <div className="modal-footer">
-            <button className="btn btn-ghost" onClick={closeModal}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave}>Guardar</button>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className={`confirm-overlay${confirm.open ? ' open' : ''}`}>
-        <div className="confirm-box">
-          <div className="confirm-icon">!</div>
-          <div className="confirm-title">Eliminar categoria</div>
-          <div className="confirm-msg">Los gastos con esta categoria quedaran sin asignar.</div>
-          <div className="confirm-btns">
-            <button className="btn btn-ghost" onClick={() => setConfirm({ open: false, id: null })}>Cancelar</button>
-            <button className="btn btn-danger" onClick={confirmDelete}>Eliminar</button>
+      {confirm.open && (
+        <div className="confirm-overlay" onClick={() => setConfirm({ open: false, id: null })}>
+          <div className="confirm-box" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-icon">!</div>
+            <div className="confirm-title">Eliminar categoria</div>
+            <div className="confirm-msg">Los gastos con esta categoria quedaran sin asignar.</div>
+            <div className="confirm-btns">
+              <button className="btn btn-ghost" onClick={() => setConfirm({ open: false, id: null })}>Cancelar</button>
+              <button className="btn btn-danger" onClick={confirmDelete}>Eliminar</button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {toast && (
         <div className="toast-container">

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { fmtCOP, loadStorage, saveStorage } from '../utils/storage';
 import '../Styles/gastos.css';
 
 export default function Gastos() {
@@ -40,13 +41,17 @@ export default function Gastos() {
   const [confirmTitle, setConfirmTitle] = useState('');
   const [confirmMsg, setConfirmMsg] = useState('');
 
+  const session = useMemo(() => JSON.parse(localStorage.getItem('ss_session') || 'null'), []);
+  const suffix = useMemo(() => (session ? `_${session.email || session.id}` : null), [session]); // Change to null if no session
+
   useEffect(() => {
     // Forzar limpieza de estados de bloqueo al iniciar
     setShowConfirm(false);
     setShowModal(false);
     setShowDetail(false);
-    loadData();
-  }, []);
+    if (suffix !== null) loadData(); // Load data only if a valid suffix (i.e., session) exists
+    else resetData(); // Clear data if no session
+  }, [suffix]);
 
   // Función de emergencia para el usuario
   const handleResetApp = () => {
@@ -57,19 +62,8 @@ export default function Gastos() {
   };
 
   const loadData = () => {
-    const safeLoad = (key, defaultValue) => {
-      try {
-        const stored = localStorage.getItem(key);
-        if (!stored) return defaultValue;
-        const parsed = JSON.parse(stored);
-        return Array.isArray(parsed) ? parsed : defaultValue;
-      } catch (e) {
-        console.error(`Error cargando ${key}:`, e);
-        return defaultValue;
-      }
-    };
-
-    const rawGastos = safeLoad('ss_gastos', []);
+    // Usamos las utilidades estándar del proyecto
+    const rawGastos = loadStorage(`ss_gastos${suffix}`, []); // suffix will be like _user@email.com
 
     const sanitizedGastos = rawGastos.map(g => ({
       ...g,
@@ -87,7 +81,7 @@ export default function Gastos() {
       { id: 'Servicios', nombre: 'Servicios' },
       { id: 'Otros', nombre: 'Otros' }
     ];
-    const loadedCats = safeLoad('ss_categorias', defaultCats);
+    const loadedCats = loadStorage(`ss_categorias${suffix}`, defaultCats);
     setCategorias(loadedCats.length > 0 ? loadedCats : defaultCats);
 
     const defaultPayments = [
@@ -96,10 +90,18 @@ export default function Gastos() {
       { id: 'Tarjeta Crédito', nombre: 'Tarjeta Crédito' },
       { id: 'Billetera Digital', nombre: 'Billetera Digital' }
     ];
-    const loadedPayments = safeLoad('ss_medios_pago', defaultPayments);
+    const loadedPayments = loadStorage(`ss_medios_pago${suffix}`, defaultPayments);
     setMediosPago(loadedPayments.length > 0 ? loadedPayments : defaultPayments);
 
-    setComerciosData(safeLoad('ss_comercios', []));
+    setComerciosData(loadStorage(`ss_comercios${suffix}`, []));
+  };
+
+  const resetData = () => {
+    setGastos([]);
+    setCategorias([]);
+    setMediosPago([]);
+    setComerciosData([]);
+    // Also reset filters if needed
   };
 
   const handleOpenModal = (gasto = null) => {
@@ -142,24 +144,26 @@ export default function Gastos() {
       return;
     }
 
-    let currentComercios = [...comercios]; // Copia actual de comercios
+    const valorNumerico = parseFloat(formData.valor) || 0;
+    const gastoToSave = { ...formData, valor: valorNumerico };
+    let currentComercios = [...comercios];
+    let updatedGastos;
     
     if (editingId) {
-      const updated = gastos.map(g => g.id === editingId ? { ...formData, id: editingId } : g);
-      setGastos(updated);
-      localStorage.setItem('ss_gastos', JSON.stringify(updated));
+      updatedGastos = gastos.map(g => g.id === editingId ? { ...gastoToSave, id: editingId } : g);
     } else {
-      const newGasto = { ...formData, id: Date.now() };
-      newGasto.valor = parseFloat(newGasto.valor) || 0;
-      const updated = [...gastos, newGasto];
-      setGastos(updated);
-      localStorage.setItem('ss_gastos', JSON.stringify(updated));
+      const newGasto = { ...gastoToSave, id: Date.now() };
+      updatedGastos = [...gastos, newGasto];
+    }
 
-      if (newGasto.comercio && typeof newGasto.comercio === 'string' && newGasto.comercio.trim() !== '' && !currentComercios.some(c => (c.nombre || c) === newGasto.comercio)) {
-        currentComercios.push({ id: newGasto.comercio, nombre: newGasto.comercio });
-        setComerciosData(currentComercios); // Actualizar el estado de comercios
-        localStorage.setItem('ss_comercios', JSON.stringify(currentComercios)); // Guardar en localStorage
-      }
+    setGastos(updatedGastos);
+    saveStorage(`ss_gastos${suffix}`, updatedGastos);
+
+    // Guardar nuevo comercio si no existe en la lista
+    if (gastoToSave.comercio && typeof gastoToSave.comercio === 'string' && gastoToSave.comercio.trim() !== '' && !currentComercios.some(c => (c.nombre || c) === gastoToSave.comercio)) {
+      const newComercios = [...currentComercios, { id: gastoToSave.comercio, nombre: gastoToSave.comercio }];
+      setComerciosData(newComercios);
+      saveStorage(`ss_comercios${suffix}`, newComercios);
     }
     
     setShowModal(false);
@@ -174,7 +178,7 @@ export default function Gastos() {
     setConfirmAction(() => () => {
       const filtered = gastos.filter(g => g.id !== gasto.id);
       setGastos(filtered);
-      localStorage.setItem('ss_gastos', JSON.stringify(filtered));
+      saveStorage(`ss_gastos${suffix}`, filtered);
       setShowConfirm(false); // Cerrar el diálogo de confirmación después de la acción
       setConfirmAction(null); // Limpiar la acción
     });
@@ -216,7 +220,7 @@ export default function Gastos() {
       {/* Tabla */}
       <div className="table-wrap">
         <div className="table-head">
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="table-filters">
             <div className="table-search">
               <svg viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8" />
@@ -255,7 +259,7 @@ export default function Gastos() {
             </select>
           </div>
           <div style={{ fontFamily: "'Syne', sans-serif", fontSize: '14px', fontWeight: '700', color: 'var(--red)' }}>
-            ${totalGastos.toLocaleString('es-CO')}
+            {fmtCOP(totalGastos)}
           </div>
         </div>
         <table>
@@ -282,7 +286,7 @@ export default function Gastos() {
                   <td>{String(gasto.comercio || '-')}</td>
                   <td>{String(gasto.medioPago || '-')}</td>
                   <td>{new Date(gasto.fecha).toLocaleDateString('es-CO')}</td>
-                  <td style={{ color: 'var(--red)', fontWeight: '600' }}>${parseFloat(gasto.valor).toLocaleString('es-CO')}</td>
+                  <td style={{ color: 'var(--red)', fontWeight: '600' }}>{fmtCOP(gasto.valor)}</td>
                   <td>
                     <span className={`badge badge-${gasto.estado === 'Activo' ? 'success' : 'danger'}`}>
                       {gasto.estado}
@@ -389,17 +393,17 @@ export default function Gastos() {
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Comercio</label>
+                <label className="form-label">Comercio (Escribe o selecciona)</label>
                 <input
-                  list="comercios-list"
                   className="form-input"
+                  list="comercios-list"
                   value={formData.comercio}
                   onChange={(e) => handleFormChange('comercio', e.target.value)}
-                  placeholder="Escribe o selecciona un comercio"
+                  placeholder="Ej: Éxito, Amazon..."
                 />
                 <datalist id="comercios-list">
                   {comercios.map((com, i) => (
-                    <option key={com.id || i} value={String(com.nombre || com)} />
+                    <option key={com.id || i} value={com.nombre || com} />
                   ))}
                 </datalist>
               </div>
@@ -444,7 +448,7 @@ export default function Gastos() {
               <div className="detail-row">
                 <span className="detail-label">Valor:</span>
                 <span className="detail-value" style={{ color: 'var(--red)', fontWeight: '600' }}>
-                  ${parseFloat(detailGasto.valor).toLocaleString('es-CO')}
+                  {fmtCOP(detailGasto.valor)}
                 </span>
               </div>
               <div className="detail-row">
@@ -483,7 +487,6 @@ export default function Gastos() {
         <div className="confirm-overlay" onClick={() => {
           setShowConfirm(false);
           setConfirmAction(null);
-          console.log('Confirm overlay clickeado, showConfirm establecido a false.'); // Debugging
         }}>
           <div className="confirm-box" onClick={(e) => e.stopPropagation()}>
             <div className="confirm-icon">!</div>

@@ -54,15 +54,19 @@ export default function ComerciosPage() {
   const [confirm, setConfirm] = useState({ open: false, id: null });
   const [toast, setToast] = useState(null);
 
+  const session = useMemo(() => JSON.parse(localStorage.getItem('ss_session') || 'null'), []);
+  const suffix = useMemo(() => (session ? `_${session.email || session.id}` : null), [session]);
+
   useEffect(() => {
-    const stored = loadStorage('ss_comercios', []);
-    if (stored.length) {
-      setComercios(stored);
-      return;
-    }
-    setComercios(DEFAULT_COMERCIOS);
-    saveStorage('ss_comercios', DEFAULT_COMERCIOS);
-  }, []);
+    if (suffix !== null) {
+      const stored = loadStorage(`ss_comercios${suffix}`, []);
+      if (stored.length) {
+        setComercios(stored);
+      } else {
+        setComercios([]); // No default comercios for new users, they will add their own
+      }
+    } else setComercios([]); // Clear if no session
+  }, [suffix]);
 
   useEffect(() => {
     if (!toast) return;
@@ -70,7 +74,7 @@ export default function ComerciosPage() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const gastos = useMemo(() => loadStorage('ss_gastos', []), []);
+  const gastos = useMemo(() => (suffix !== null ? loadStorage(`ss_gastos${suffix}`, []) : []), [suffix]);
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return comercios.filter((comercio) => {
@@ -88,6 +92,8 @@ export default function ComerciosPage() {
 
   const openModal = (comercio = null) => {
     setForm(comercio || EMPTY_FORM);
+    setConfirm({ open: false, id: null });
+    setDetailId(null);
     setIsModalOpen(true);
   };
 
@@ -113,23 +119,29 @@ export default function ComerciosPage() {
     }
 
     setComercios(next);
-    saveStorage('ss_comercios', next);
+    saveStorage(`ss_comercios${suffix}`, next);
     closeModal();
   };
 
   const handleDelete = (id) => {
     setConfirm({ open: true, id });
+    setIsModalOpen(false);
+    setDetailId(null);
   };
 
   const confirmDelete = () => {
     const next = comercios.filter((item) => item.id !== confirm.id);
     setComercios(next);
-    saveStorage('ss_comercios', next);
+    saveStorage(`ss_comercios${suffix}`, next);
     setConfirm({ open: false, id: null });
     setToast({ message: 'Comercio eliminado', variant: 'info' });
   };
 
-  const openDetail = (id) => setDetailId(id);
+  const openDetail = (id) => {
+    setDetailId(id);
+    setIsModalOpen(false);
+    setConfirm({ open: false, id: null });
+  };
   const closeDetail = () => setDetailId(null);
 
   return (
@@ -202,74 +214,76 @@ export default function ComerciosPage() {
         </table>
       </div>
 
-      <div className={`modal-overlay${isModalOpen ? ' open' : ''}`}>
-        <div className="modal modal-lg">
-          <div className="modal-title">
-            <span>{form.id ? 'Editar Comercio' : 'Nuevo Comercio'}</span>
-            <button className="modal-close" onClick={closeModal}>×</button>
-          </div>
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-title">
+              <span>{form.id ? 'Editar Comercio' : 'Nuevo Comercio'}</span>
+              <button className="modal-close" onClick={closeModal}>×</button>
+            </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Nombre *</label>
-              <input className="form-input" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Tienda Central" />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Nombre *</label>
+                <input className="form-input" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Tienda Central" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">NIT</label>
+                <input className="form-input" value={form.nit} onChange={(e) => setForm({ ...form, nit: e.target.value })} placeholder="900123456" />
+              </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">NIT</label>
-              <input className="form-input" value={form.nit} onChange={(e) => setForm({ ...form, nit: e.target.value })} placeholder="900123456" />
-            </div>
-          </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Actividad</label>
-              <input className="form-input" value={form.actividad} onChange={(e) => setForm({ ...form, actividad: e.target.value })} placeholder="Ej: Alimentos" />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Actividad</label>
+                <input className="form-input" value={form.actividad} onChange={(e) => setForm({ ...form, actividad: e.target.value })} placeholder="Ej: Alimentos" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Tipo</label>
+                <select className="form-select" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
+                  <option>Comercio</option>
+                  <option>Servicio</option>
+                </select>
+              </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Tipo</label>
-              <select className="form-select" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
-                <option>Comercio</option>
-                <option>Servicio</option>
-              </select>
-            </div>
-          </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Contacto</label>
-              <input className="form-input" value={form.contacto} onChange={(e) => setForm({ ...form, contacto: e.target.value })} placeholder="correo@ejemplo.com" />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Contacto</label>
+                <input className="form-input" value={form.contacto} onChange={(e) => setForm({ ...form, contacto: e.target.value })} placeholder="correo@ejemplo.com" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Telefono</label>
+                <input className="form-input" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} placeholder="311 111 1111" />
+              </div>
             </div>
-            <div className="form-group">
-              <label className="form-label">Telefono</label>
-              <input className="form-input" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} placeholder="311 111 1111" />
-            </div>
-          </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Ciudad</label>
-              <input className="form-input" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} placeholder="Bogotá" />
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Ciudad</label>
+                <input className="form-input" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} placeholder="Bogotá" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Pais</label>
+                <input className="form-input" value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })} placeholder="Colombia" />
+              </div>
             </div>
+
             <div className="form-group">
-              <label className="form-label">Pais</label>
-              <input className="form-input" value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })} placeholder="Colombia" />
+              <label className="form-label">Direccion</label>
+              <input className="form-input" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} placeholder="Cra 00 #00-00" />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label className="form-label">Direccion</label>
-            <input className="form-input" value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} placeholder="Cra 00 #00-00" />
-          </div>
-
-          <div className="modal-footer">
-            <button className="btn btn-ghost" onClick={closeModal}>Cancelar</button>
-            <button className="btn btn-primary" onClick={handleSave}>Guardar</button>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={closeModal}>Cancelar</button>
+              <button className="btn btn-primary" onClick={handleSave}>Guardar</button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className={`detail-overlay${detailId ? ' open' : ''}`} onClick={closeDetail}>
-        {selectedDetail && (
+      {detailId && selectedDetail && (
+        <div className="detail-overlay" onClick={closeDetail}>
           <div className="detail-panel" onClick={(event) => event.stopPropagation()}>
             <div className="detail-header">
               <div className="detail-title">Detalle del Comercio</div>
@@ -293,20 +307,22 @@ export default function ComerciosPage() {
               <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => { closeDetail(); handleDelete(selectedDetail.id); }}>Eliminar</button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className={`confirm-overlay${confirm.open ? ' open' : ''}`}>
-        <div className="confirm-box">
-          <div className="confirm-icon">!</div>
-          <div className="confirm-title">Eliminar comercio</div>
-          <div className="confirm-msg">¿Seguro que deseas eliminar este comercio?</div>
-          <div className="confirm-btns">
-            <button className="btn btn-ghost" onClick={() => setConfirm({ open: false, id: null })}>Cancelar</button>
-            <button className="btn btn-danger" onClick={confirmDelete}>Eliminar</button>
+      {confirm.open && (
+        <div className="confirm-overlay" onClick={() => setConfirm({ open: false, id: null })}>
+          <div className="confirm-box" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-icon">!</div>
+            <div className="confirm-title">Eliminar comercio</div>
+            <div className="confirm-msg">¿Seguro que deseas eliminar este comercio?</div>
+            <div className="confirm-btns">
+              <button className="btn btn-ghost" onClick={() => setConfirm({ open: false, id: null })}>Cancelar</button>
+              <button className="btn btn-danger" onClick={confirmDelete}>Eliminar</button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {toast && (
         <div className="toast-container">
