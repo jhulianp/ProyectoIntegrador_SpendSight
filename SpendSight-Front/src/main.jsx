@@ -3,6 +3,8 @@ import './Styles/base.css';
 import './Styles/layout.css';
 import './Styles/components.css';
 import './Styles/categorias.css';
+import './Styles/dashboard.css';
+import './Styles/gastos.css';
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

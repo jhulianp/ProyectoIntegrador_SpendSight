@@ -28,8 +28,10 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container">
-      {/* Header con fecha y filtros */}
+    <div className="dashboard-container" style={{ color: 'white' }}>
+      <h1>Dashboard</h1>
+      <p>Fecha: {currentDate}</p>
+      
       <div className="dashboard-header">
         <div>
           <div className="section-title">Resumen General</div>
