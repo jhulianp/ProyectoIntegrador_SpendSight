@@ -6,14 +6,20 @@ import CategoriasPage from './pages/CategoriasPage';
 import ComerciosPage from './pages/ComerciosPage';
 import ConfigPage from './pages/ConfigPage';
 import LoginPage from './pages/LoginPage';
+import LandingPage from './pages/Iniciopage';
 
 export default function App() {
   const session = localStorage.getItem('ss_session');
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate replace to={session ? "/dashboard" : "/login"} />} />
-      <Route path="/login" element={<LoginPage />} />
+      {/* Página de inicio pública */}
+      <Route path="/" element={session ? <Navigate replace to="/dashboard" /> : <LandingPage />} />
+
+      {/* Login / Registro */}
+      <Route path="/login" element={session ? <Navigate replace to="/dashboard" /> : <LoginPage />} />
+
+      {/* Rutas protegidas */}
       {session && (
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -23,7 +29,9 @@ export default function App() {
           <Route path="/config" element={<ConfigPage />} />
         </Route>
       )}
-      <Route path="*" element={<Navigate replace to={session ? "/dashboard" : "/login"} />} />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate replace to={session ? "/dashboard" : "/"} />} />
     </Routes>
   );
 }

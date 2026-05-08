@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/auth.css';
+import '../Styles/Inicio.css';
+import Footer from '../components/Footer.jsx';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,7 +12,12 @@ export default function LoginPage() {
     nombres: '',
     apellidos: '',
     confirmPassword: '',
-    avatar: 'A'
+    avatar: 'A',
+    fechaNacimiento: '',
+    telefono: '',
+    direccion: '',
+    ciudad: '',
+    pais: 'Colombia',
   });
   const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
@@ -53,7 +60,7 @@ export default function LoginPage() {
   };
 
   const handleRegister = () => {
-    const { nombres, apellidos, email, password, confirmPassword } = form;
+    const { nombres, apellidos, email, password, confirmPassword, fechaNacimiento, telefono, direccion, ciudad, pais } = form;
     if (!nombres || !email || !password) {
       setAlert({ type: 'error', message: 'Completa los campos obligatorios.' });
       return;
@@ -80,6 +87,11 @@ export default function LoginPage() {
       email,
       pass: btoa(password),
       avatar: form.avatar,
+      fechaNacimiento,
+      telefono,
+      direccion,
+      ciudad,
+      pais,
       fechaRegistro: new Date().toISOString()
     };
 
@@ -99,18 +111,29 @@ export default function LoginPage() {
     const demoUser = {
       id: 9999,
       nombres: 'Usuario Demo',
+      apellidos: '',
       email: 'demo@spendsight.com',
-      avatar: 'D'
+      avatar: 'D',
+      fechaNacimiento: '',
+      telefono: '',
+      direccion: '',
+      ciudad: '',
+      pais: 'Colombia',
     };
     localStorage.setItem('ss_session', JSON.stringify(demoUser));
     window.location.href = '/dashboard';
   };
 
   return (
-    <div className="auth-body">
-      <div className="auth-wrap">
+    <div className="auth-body" style={{ flexDirection: 'column', justifyContent: 'flex-start', paddingTop: 0 }}>
+      <div className="auth-wrap" style={{ marginTop: 'auto', marginBottom: '40px', paddingTop: '60px' }}>
         <div className="auth-card">
-          <div className="auth-logo">
+          <div
+            className="auth-logo"
+            onClick={() => navigate('/')}
+            style={{ cursor: 'pointer', userSelect: 'none' }}
+            title="Volver al inicio"
+          >
             <div className="auth-logo-icon">SS</div>
             <span className="auth-logo-text">SpendSight</span>
           </div>
@@ -174,8 +197,9 @@ export default function LoginPage() {
           ) : (
             <div className="auth-form active">
               <div className="auth-form-title">Crear cuenta</div>
-              <div className="auth-form-sub">Únete a SpendSight</div>
+              <div className="auth-form-sub">Únete a SpendSight — todos los campos con * son obligatorios</div>
 
+              {/* Nombres y Apellidos */}
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Nombres *</label>
@@ -199,6 +223,7 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {/* Correo */}
               <div className="form-group">
                 <label className="form-label">Correo electrónico *</label>
                 <input
@@ -211,6 +236,68 @@ export default function LoginPage() {
                 />
               </div>
 
+              {/* Fecha de nacimiento y Teléfono */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Fecha de nacimiento</label>
+                  <input
+                    className="form-input"
+                    type="date"
+                    name="fechaNacimiento"
+                    value={form.fechaNacimiento}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Teléfono</label>
+                  <input
+                    className="form-input"
+                    type="tel"
+                    name="telefono"
+                    value={form.telefono}
+                    onChange={handleInputChange}
+                    placeholder="311 111 1111"
+                  />
+                </div>
+              </div>
+
+              {/* Dirección */}
+              <div className="form-group">
+                <label className="form-label">Dirección</label>
+                <input
+                  className="form-input"
+                  name="direccion"
+                  value={form.direccion}
+                  onChange={handleInputChange}
+                  placeholder="Cra 10 #23-45"
+                />
+              </div>
+
+              {/* Ciudad y País */}
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Ciudad</label>
+                  <input
+                    className="form-input"
+                    name="ciudad"
+                    value={form.ciudad}
+                    onChange={handleInputChange}
+                    placeholder="Bogotá"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">País</label>
+                  <input
+                    className="form-input"
+                    name="pais"
+                    value={form.pais}
+                    onChange={handleInputChange}
+                    placeholder="Colombia"
+                  />
+                </div>
+              </div>
+
+              {/* Contraseñas */}
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Contraseña *</label>
@@ -256,6 +343,11 @@ export default function LoginPage() {
         <div className="blob blob-3"></div>
       </div>
       <div className="noise-overlay"></div>
+
+      {/* Footer */}
+      <div className="auth-footer-wrap" style={{ width: '100%', marginTop: 'auto' }}>
+        <Footer />
+      </div>
     </div>
   );
 }
