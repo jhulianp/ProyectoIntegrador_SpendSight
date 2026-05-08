@@ -1,50 +1,64 @@
-package com.example.SpendSight.Modelos.Servicios;
-
+package com.example.SpendSight.servicios;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.example.SpendSight.Modelos.Categoria;
-import com.example.SpendSight.Modelos.repositorio.ICategoriaRepositorio;
-import com.example.SpendSight.Modelos.repositorio.IcomercioRepositorio;
+import com.example.SpendSight.repositorios.ICategoriaRepositorio;
+import com.example.SpendSight.repositorios.IcomercioRepositorio;
 
 @Service
 public class CategoriaServicio {
     
     @Autowired
-    private IcomercioRepositorio repositorio;
+    private ICategoriaRepositorio repositorio;
 
-    public Categoria guardCategoria(Categoria datosCategoria){
-        if (datosCategoria.getNombre()==null) {
-         throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
-        if (datosCategoria.getDescripcion()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
-        if (datosCategoria.getFechaCreacion()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
-        if (datosCategoria.getFechaModificacion()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
-        if (datosCategoria.getUsuarioCreacion()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
-        if (datosCategoria.getTipo()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
+    public Categoria guardarCategoria(Categoria datosCategoria) {
+        if (datosCategoria.getNombre() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre es obligatorio");
+        }
+        if (datosCategoria.getDescripcion() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La descripción es obligatoria");
+        }
+        if (datosCategoria.getFechaCreacion() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de creación es obligatoria");
+        }
+        if (datosCategoria.getFechaModificacion() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de modificación es obligatoria");
+        }
+        if (datosCategoria.getUsuarioCreacion() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El usuario de creación es obligatorio");
+        }
+        if (datosCategoria.getTipo() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El tipo es obligatorio");
+        }
 
-
+        return repositorio.save(datosCategoria);
     }
 
-    public list<Categoria> listarCategoria(){
+    public List<Categoria> listarCategoria() {
         return repositorio.findAll();
     }
-    public void eliminar_Categoria(Integer id) {
-    if (!repositorio.existsById(id)) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria no encontrado");
-    }
+
+    public void eliminarCategoria(Integer id) {
+        if (!repositorio.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada");
+        }
         repositorio.deleteById(id);
     }
 
-    public Categoria buscar_categoria_por_id(Integer id) {
-        return repositorio.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "categoria no encontrado"));
+    public Categoria modificarCategoria(Categoria categoria){
+        if(categoria.getId()==0){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"ID del  usuario para modificar");
+        }
+        if (categoria.getNombre()==null || categoria.getNombre().isBlank()  || categoria.getNombre().isEmpty() ) {
+            throw new  ResponseStatusException(HttpStatus.BAD_REQUEST,"El nombre del usuario es obligatoria");
+        }
+        return repositorio.save(categoria);
+    }
+
+    public Categoria buscarCategoriaPorId(Integer id) {
+        return repositorio.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
 }

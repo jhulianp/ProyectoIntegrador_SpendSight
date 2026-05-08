@@ -12,7 +12,7 @@ import com.example.SpendSight.Modelos.utils.TipoCategoria;
 
 //id, nombre, fechaCreacion, responsable, justificacion
 @Entity
-@Table(name = "categorias")
+@Table(name = "categoria")
 public class Categoria {
     @Id
     private int id;
