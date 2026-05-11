@@ -1,4 +1,4 @@
-package com.example.SpendSight.Modelos.repositorio;
+package com.example.SpendSight.Repositorios;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface IcomercioRepositorio extends JpaRepository<Comercio,Integer> {
  List<Comercio> findByDireccion(String Direccion);
  List<Comercio> findByTelefono(String Telefono);
  List<Comercio> findByTipo(String Tipo);
- List<Comercio> findByGastos(Number Gasto);
+ List<Comercio> findByGastoId(Number GastoId);
  List<Comercio> findByPais(String Pais);
 
 }

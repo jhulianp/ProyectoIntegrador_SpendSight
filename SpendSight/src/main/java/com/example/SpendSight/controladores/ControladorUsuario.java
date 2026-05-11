@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.SpendSight.Modelos.Usuario;
-import com.example.SpendSight.servicios.UsuarioServicio;
+import com.example.SpendSight.Servicios.UsuarioServicio;
 
 @RestController
 @RequestMapping("/api/usuarios")

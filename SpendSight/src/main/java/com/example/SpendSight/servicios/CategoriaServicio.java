@@ -1,4 +1,4 @@
-package com.example.SpendSight.Modelos.Servicios;
+package com.example.SpendSight.Servicios;
 
 import java.util.List;
 
@@ -8,33 +8,31 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.SpendSight.Modelos.Categoria;
-import com.example.SpendSight.Modelos.repositorio.ICategoriaRepositorio;
-import com.example.SpendSight.Modelos.repositorio.IcomercioRepositorio;
+import com.example.SpendSight.Repositorios.ICategoriaRepositorio;
 
 @Service
 public class CategoriaServicio {
     
     @Autowired
-    private IcomercioRepositorio repositorio;
+    private ICategoriaRepositorio repositorio;
 
     public Categoria guardCategoria(Categoria datosCategoria){
         if (datosCategoria.getNombre()==null) {
-         throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
+         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
         if (datosCategoria.getDescripcion()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
         if (datosCategoria.getFechaCreacion()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
         if (datosCategoria.getFechaModificacion()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
         if (datosCategoria.getUsuarioCreacion()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
         if (datosCategoria.getTipo()==null) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
-
-
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"llenar todo, es obligatorio");}
+        return repositorio.save(datosCategoria);
     }
 
-    public list<Categoria> listarCategoria(){
+    public List<Categoria> listarCategoria(){
         return repositorio.findAll();
     }
     public void eliminar_Categoria(Integer id) {

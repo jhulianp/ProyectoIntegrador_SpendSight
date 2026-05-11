@@ -1,4 +1,4 @@
-package com.example.SpendSight.Repositorio;
+package com.example.SpendSight.Repositorios;
 
 import com.example.SpendSight.Modelos.MedioPago;
 import org.springframework.data.jpa.repository.JpaRepository;

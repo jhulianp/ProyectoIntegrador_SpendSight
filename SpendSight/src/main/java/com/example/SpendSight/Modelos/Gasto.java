@@ -33,7 +33,8 @@ public class Gasto {
     private String medioPago;
     @Column(name = "categoria", nullable = false, unique = false, length = 50)
     private String categoria;
-    @Column(name = "comercio", nullable = false, unique = false, length = 50)
+    @ManyToOne
+    @JoinColumn(name = "fk_comercio", referencedColumnName = "id")
     private Comercio comercio;
 
     //yo como gasto me relaciono con 1 usuario

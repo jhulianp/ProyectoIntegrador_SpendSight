@@ -1,7 +1,7 @@
-package com.example.SpendSight.Controlador;
+package com.example.SpendSight.controladores;
 
 import com.example.SpendSight.Modelos.MedioPago;
-import com.example.SpendSight.Servicio.MedioPagoServicio;
+import com.example.SpendSight.Servicios.MedioPagoServicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -8,9 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.SpendSight.Modelos.Comercio;
-import com.example.SpendSight.Modelos.Servicios.comercioServicio;
+import com.example.SpendSight.Servicios.ComercioServicio;
 
 @RestController
 @RequestMapping("apispendsight/v1/")
@@ -18,12 +20,14 @@ public class controladorComercio {
     @Autowired
     ComercioServicio comercio;
 
+    @PostMapping("comercios")
     public ResponseEntity<?>controladorGuardar(@RequestBody Comercio comercios){
-        return ResponseEntity.status(HttpStatus.OK).body(servicio.guardarComercio(comercios));
+        return ResponseEntity.status(HttpStatus.OK).body(comercio.guardarComercio(comercios));
     }
     
+    @GetMapping("comercios")
     public ResponseEntity<?>controladorListar(){
-        return ResponseEntity.status(HttpStatus.OK).body(servicio.listarComercios());
+        return ResponseEntity.status(HttpStatus.OK).body(comercio.listarComercios());
     }
 
 }
