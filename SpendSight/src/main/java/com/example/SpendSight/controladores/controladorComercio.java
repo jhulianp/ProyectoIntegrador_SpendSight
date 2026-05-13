@@ -17,15 +17,20 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.SpendSight.Modelos.Comercio;
-import com.example.SpendSight.servicios.ComercioServicio;
+
+import com.example.SpendSight.Servicios.ComercioServicio;
+
 
 @RestController
 @RequestMapping("apispendsight/v1/Comercio")
 public class controladorComercio {
     @Autowired
     private ComercioServicio comercioServicio;
+
 
     @GetMapping
     public ResponseEntity<List<Comercio>> listarComercios(){
@@ -55,6 +60,7 @@ public class controladorComercio {
     public ResponseEntity<Void> eliminarComercio(@PathVariable Integer id) {
         comercioServicio.eliminarComercio(id);
         return ResponseEntity.noContent().build();
+
     }
 
 }

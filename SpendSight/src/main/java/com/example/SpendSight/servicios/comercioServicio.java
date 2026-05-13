@@ -1,11 +1,15 @@
+
 package com.example.SpendSight.servicios;
+
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import com.example.SpendSight.Modelos.Comercio;
+
 import com.example.SpendSight.repositorios.IcomercioRepositorio;
+
 
 @Service
 public class ComercioServicio {
@@ -41,6 +45,7 @@ public class ComercioServicio {
         if (datosComercio.getPais() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El país es obligatorio");
         }
+
         
         return repositorio.save(datosComercio);    
     }

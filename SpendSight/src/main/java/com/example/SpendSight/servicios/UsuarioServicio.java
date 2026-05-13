@@ -1,11 +1,11 @@
-package com.example.SpendSight.servicios;
+package com.example.SpendSight.Servicios;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import com.example.SpendSight.Modelos.Usuario;
-import com.example.SpendSight.repositorios.IUsuarioRepositorio;
+import com.example.SpendSight.Repositorios.IUsuarioRepositorio;
 
 @Service
 public class UsuarioServicio {

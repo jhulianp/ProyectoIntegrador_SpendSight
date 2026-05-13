@@ -1,4 +1,7 @@
+
 package com.example.SpendSight.repositorios;
+
+
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,7 +17,7 @@ public interface IcomercioRepositorio extends JpaRepository<Comercio,Integer> {
  List<Comercio> findByDireccion(String Direccion);
  List<Comercio> findByTelefono(String Telefono);
  List<Comercio> findByTipo(String Tipo);
- List<Comercio> findByGastos(Number Gasto);
+ List<Comercio> findByGastoId(Number GastoId);
  List<Comercio> findByPais(String Pais);
 
 }
