@@ -1,10 +1,10 @@
-package com.example.SpendSight.Repositorios;
+
+package com.example.SpendSight.repositorios;
+
 
 import java.util.List;
 import java.util.Locale.Category;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.example.SpendSight.Modelos.Categoria;
 
 public interface ICategoriaRepositorio  extends JpaRepository<Categoria,Integer>{
