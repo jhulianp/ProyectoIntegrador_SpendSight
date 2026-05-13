@@ -55,7 +55,6 @@ public class ComercioServicio {
         }
         repositorio.deleteById(id);
     }
-
     public Comercio modificarComercio(Comercio comercio) {
         if (comercio.getId() == null || comercio.getId() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID del comercio es obligatorio para modificar");
