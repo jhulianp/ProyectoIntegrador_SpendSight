@@ -15,7 +15,7 @@ import com.example.SpendSight.Servicios.GastoServicio;
 
 
 @RestController
-@RequestMapping("apispendsight/v1/gastos")
+@RequestMapping("https://6a0726e6c83ba8ad9b3e8e33.mockapi.io/Apispendsight/v1/gastos/Gastos")
 public class ControladorGasto {
     @Autowired
     GastoServicio servicio;

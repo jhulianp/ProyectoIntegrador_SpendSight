@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.SpendSight.Modelos.Comercio;
 
-import com.example.SpendSight.Servicios.ComercioServicio;
+import com.example.SpendSight.servicios.ComercioServicio;
 
 
 @RestController

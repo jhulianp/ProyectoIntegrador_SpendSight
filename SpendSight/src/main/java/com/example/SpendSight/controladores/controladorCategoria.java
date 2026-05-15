@@ -56,5 +56,6 @@ public class controladorCategoria {
     public ResponseEntity<Void> eliminarCategoria(@PathVariable Integer id) {
         categoriaServicio.eliminarCategoria(id);
         return ResponseEntity.noContent().build();
-  
+    }
 }
+
