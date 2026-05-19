@@ -7,8 +7,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import java.util.List;
 import com.example.SpendSight.Modelos.utils.EstadoMedioPago;
-
 @Entity
 @Table(name = "medios_pago")
 public class MedioPago {
@@ -26,6 +27,10 @@ public class MedioPago {
     @ManyToOne
     @JoinColumn(name = "fk_usuario", referencedColumnName = "id")
     private Usuario usuario;
+
+    //Yo como medio de pago me relaciono con muchos gastos
+    @OneToMany(mappedBy = "medioPago")
+    private List<Gasto> gastos;
 
     public MedioPago() {
     }
@@ -76,5 +81,13 @@ public class MedioPago {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public List<Gasto> getGastos() {
+        return gastos;
+    }
+
+    public void setGastos(List<Gasto> gastos) {
+        this.gastos = gastos;
     }
 }

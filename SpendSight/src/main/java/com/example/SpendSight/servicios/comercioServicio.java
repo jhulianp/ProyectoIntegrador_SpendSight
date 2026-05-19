@@ -39,9 +39,6 @@ public class ComercioServicio {
         if (datosComercio.getTipo() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El tipo es obligatorio");
         }
-        if (datosComercio.getGasto() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El gasto es obligatorio");
-        }
         if (datosComercio.getPais() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El país es obligatorio");
         }

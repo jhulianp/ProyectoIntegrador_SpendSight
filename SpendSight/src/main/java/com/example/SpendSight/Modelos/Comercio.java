@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import com.example.SpendSight.Modelos.utils.TipoComercio;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import java.util.List;
 
 /**
  * id,nit,nombre,actividad,contacto(correo),telefono,direccion,ciudad,pais,tipo(comercio/servicio)
@@ -41,9 +42,11 @@ public class Comercio {
     @Column(name = "tipo", nullable = false)
     @Enumerated(EnumType.STRING)
     private TipoComercio tipo;
+
+    //Yo como comercio me relaciono con 1 usuario
     @ManyToOne
-    @JoinColumn(name = "fk_gasto", referencedColumnName = "id")
-    private Gasto gasto;
+    @JoinColumn(name = "fk_usuario", referencedColumnName = "id")
+    private Usuario usuario;
 
     public Comercio() {
     }
@@ -142,11 +145,11 @@ public class Comercio {
         this.tipo = tipo;
     }
 
-    public Gasto getGasto() {
-        return gasto;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setGasto(Gasto gasto) {
-        this.gasto = gasto;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 }

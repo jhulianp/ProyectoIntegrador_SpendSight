@@ -7,6 +7,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import java.util.List;
 import com.example.SpendSight.Modelos.utils.EstadoCategoria;
 import com.example.SpendSight.Modelos.utils.TipoCategoria;
 
@@ -36,9 +38,14 @@ public class Categoria {
     private String usuarioCreacion;
     @Column(name = "usuario_modificacion", nullable = true, length = 50)
     private String usuarioModificacion;
+
     @ManyToOne
-    @JoinColumn(name = "fk_gasto", referencedColumnName = "id")
-    private Gasto gasto;
+    @JoinColumn(name = "fk_usuario", referencedColumnName = "id")
+    private Usuario usuario;
+
+    //Yo como categoría me relaciono con muchos gastos
+    @OneToMany(mappedBy = "categoria")
+    private List<Gasto> gastos;
 
     public Categoria() {
     }
@@ -139,11 +146,19 @@ public class Categoria {
         this.usuarioModificacion = usuarioModificacion;
     }
 
-    public Gasto getGasto() {
-        return gasto;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setGasto(Gasto gasto) {
-        this.gasto = gasto;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public List<Gasto> getGastos() {
+        return gastos;
+    }
+
+    public void setGastos(List<Gasto> gastos) {
+        this.gastos = gastos;
     }
 }
