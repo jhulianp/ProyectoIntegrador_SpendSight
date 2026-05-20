@@ -22,14 +22,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.SpendSight.Modelos.Comercio;
 
-import com.example.SpendSight.servicios.ComercioServicio;
+import com.example.SpendSight.Servicios.comercioServicio;
 
 
 @RestController
 @RequestMapping("apispendsight/v1/Comercio")
 public class controladorComercio {
     @Autowired
-    private ComercioServicio comercioServicio;
+    private comercioServicio comercioServicio;
 
 
     @GetMapping

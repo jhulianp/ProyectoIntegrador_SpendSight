@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.SpendSight.Modelos.Categoria;
 
-import com.example.SpendSight.servicios.CategoriaServicio;
+import com.example.SpendSight.Servicios.CategoriaServicio;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,8 +48,8 @@ public class controladorCategoria {
     
     @PutMapping
     public ResponseEntity<Categoria>modificarCategoria(@RequestBody Categoria categoria) {
-       Categoria categoriaModificada = categoriaServicio.modificarCategoria(categoria);
-       return ResponseEntity.ok(categoriaModificada);
+        Categoria categoriaModificada = categoriaServicio.modificarCategoria(categoria);
+        return ResponseEntity.ok(categoriaModificada);
     }
     
     @DeleteMapping("/{id}")
