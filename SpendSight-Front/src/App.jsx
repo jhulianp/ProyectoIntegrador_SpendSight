@@ -4,6 +4,7 @@ import DashboardPage from './pages/DashboardPage';
 import GastosPage from './pages/GastosPage';
 import CategoriasPage from './pages/CategoriasPage';
 import ComerciosPage from './pages/ComerciosPage';
+import MediosPagoPage from './pages/MediosPagoPage';
 import ConfigPage from './pages/ConfigPage';
 import LoginPage from './pages/LoginPage';
 import LandingPage from './pages/Iniciopage';
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/gastos" element={<GastosPage />} />
           <Route path="/categorias" element={<CategoriasPage />} />
           <Route path="/comercios" element={<ComerciosPage />} />
+          <Route path="/medios-pago" element={<MediosPagoPage />} />
           <Route path="/config" element={<ConfigPage />} />
         </Route>
       )}

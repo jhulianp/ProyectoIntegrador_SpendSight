@@ -8,6 +8,7 @@ const navItems = [
   { path: '/gastos', label: 'Gastos', icon: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6' },
   { path: '/categorias', label: 'Categorias', icon: 'M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z M7 7h.01' },
   { path: '/comercios', label: 'Comercios', icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22v-10h6v10' },
+  { path: '/medios-pago', label: 'Medios de pago', icon: 'M3 6h18v12H3z M3 10h18 M7 15h4' },
   { path: '/config', label: 'Mi Cuenta', icon: 'M12 8a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-8 12c0-4 3.6-7 8-7s8 3 8 7' },
 ];
 
@@ -16,6 +17,7 @@ const titleMap = {
   '/gastos': 'Gastos',
   '/categorias': 'Categorias',
   '/comercios': 'Comercios',
+  '/medios-pago': 'Medios de pago',
   '/config': 'Mi Cuenta',
 };
 
@@ -34,7 +36,7 @@ export default function Layout() {
           <span className="logo-text">SpendSight</span>
         </div>
 
-        {navItems.slice(0, 4).map((item) => (
+        {navItems.slice(0, 5).map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
