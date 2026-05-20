@@ -17,7 +17,6 @@ public interface IcomercioRepositorio extends JpaRepository<Comercio,Integer> {
  List<Comercio> findByDireccion(String Direccion);
  List<Comercio> findByTelefono(String Telefono);
  List<Comercio> findByTipo(String Tipo);
- List<Comercio> findByGastoId(Number GastoId);
  List<Comercio> findByPais(String Pais);
 
 }

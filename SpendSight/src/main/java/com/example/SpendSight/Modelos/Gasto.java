@@ -29,23 +29,26 @@ public class Gasto {
     private BigDecimal valor;
     @Column(name = "imagen", nullable = true, unique = false, length = 255)
     private String imagen;
-    @Column(name = "medio_pago", nullable = false, unique = false, length = 50)
-    private String medioPago;
-    @Column(name = "categoria", nullable = false, unique = false, length = 50)
-    private String categoria;
+
+    //Yo como gasto me relaciono con 1 usuario
+    @ManyToOne
+    @JoinColumn(name = "fk_usuario", referencedColumnName = "id")
+    private Usuario usuario;
+
+    //Yo como gasto me relaciono con 1 categoría
+    @ManyToOne
+    @JoinColumn(name = "fk_categoria", referencedColumnName = "id")
+    private Categoria categoria;
+
+    //Yo como gasto me relaciono con 1 comercio
     @ManyToOne
     @JoinColumn(name = "fk_comercio", referencedColumnName = "id")
     private Comercio comercio;
 
-    //yo como gasto me relaciono con 1 usuario
+    //Yo como gasto me relaciono con 1 medio de pago
     @ManyToOne
-    @JoinColumn(name = "fk_usuario", referencedColumnName = "id")
-    private Usuario usuario;
-    @ManyToOne
-    @JoinColumn(name = "fk_categoria", referencedColumnName = "id")
-    private Categoria categoria1;
-    @OneToMany(mappedBy = "gasto")
-    private List<Comercio> comercios;
+    @JoinColumn(name = "fk_medio_pago", referencedColumnName = "id")
+    private MedioPago medioPago;
 
     @Column(name = "estado", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -53,7 +56,7 @@ public class Gasto {
     @Column(name = "notas", nullable = true, length = 255)
     private String notas;
 
-public Gasto() {
+    public Gasto() {
     }
 
     public Gasto(Long id,
@@ -61,9 +64,10 @@ public Gasto() {
                 LocalDate fecha,
                 BigDecimal valor,
                 String imagen,
-                String medioPago,
-                String categoria,
+                Usuario usuario,
+                Categoria categoria,
                 Comercio comercio,
+                MedioPago medioPago,
                 EstadoGasto estado,
                 String notas) {
         this.id = id;
@@ -71,9 +75,10 @@ public Gasto() {
         this.fecha = fecha;
         this.valor = valor;
         this.imagen = imagen;
-        this.medioPago = medioPago;
+        this.usuario = usuario;
         this.categoria = categoria;
         this.comercio = comercio;
+        this.medioPago = medioPago;
         this.estado = estado;
         this.notas = notas;
     }
@@ -118,19 +123,19 @@ public Gasto() {
         this.imagen = imagen;
     }
 
-    public String getMedioPago() {
-        return medioPago;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setMedioPago(String medioPago) {
-        this.medioPago = medioPago;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
-    public String getCategoria() {
+    public Categoria getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(String categoria) {
+    public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
     }
 
@@ -140,6 +145,14 @@ public Gasto() {
 
     public void setComercio(Comercio comercio) {
         this.comercio = comercio;
+    }
+
+    public MedioPago getMedioPago() {
+        return medioPago;
+    }
+
+    public void setMedioPago(MedioPago medioPago) {
+        this.medioPago = medioPago;
     }
 
     public EstadoGasto getEstado() {

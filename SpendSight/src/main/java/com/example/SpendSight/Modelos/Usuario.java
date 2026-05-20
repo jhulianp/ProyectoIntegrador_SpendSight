@@ -50,6 +50,14 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario")
     private List<MedioPago> mediosPago;
 
+    //Yo como usuario me relaciono con muchas categorías
+    @OneToMany(mappedBy = "usuario")
+    private List<Categoria> categorias;
+
+    //Yo como usuario me relaciono con muchos comercios
+    @OneToMany(mappedBy = "usuario")
+    private List<Comercio> comercios;
+
     public Usuario() {
     }
 
