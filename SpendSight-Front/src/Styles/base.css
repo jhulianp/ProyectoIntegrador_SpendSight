@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap');
+
+:root {
+  --bg:       #0a0a0f;
+  --bg2:      #111118;
+  --bg3:      #1a1a24;
+  --card:     #14141e;
+  --card2:    #1c1c2a;
+
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.13);
+
+  --accent:   #7c6aff;
+  --accent2:  #a78bfa;
+  --accent3:  #c4b5fd;
+
+  --green:    #34d399;
+  --red:      #f87171;
+  --yellow:   #fbbf24;
+  --blue:     #60a5fa;
+  --pink:     #f472b6;
+  --orange:   #fb923c;
+
+  --text:     #f1f0ff;
+  --text2:    #9896b0;
+  --text3:    #5c5a72;
+
+  --glow:     rgba(124,106,255,0.15);
+  --sidebar-w: 72px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html { font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(124,106,255,.2);
+}
+
+::placeholder { color: var(--text3); }
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideRight {
+  from { transform: translateX(30px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes toastIn {
+  from { transform: translateX(16px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-6px); }
+  75%       { transform: translateX(6px); }
+}
+
+.font-display { font-family: 'Syne', sans-serif; }
+.section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 26px; margin-bottom: 4px; }
+.section-sub   { color: var(--text2); font-size: 13px; }
+.card-title    { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 15px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; }
+.card-badge    { background: var(--bg3); color: var(--text2); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; font-family: 'DM Sans', sans-serif; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+}
+
+.empty { text-align: center; padding: 50px 20px; color: var(--text3); }
+.empty-icon  { font-size: 44px; margin-bottom: 10px; opacity: .35; }
+.empty-text  { font-size: 13px; line-height: 1.6; }
+
+.status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+.dot-on     { background: var(--green); box-shadow: 0 0 6px rgba(52,211,153,.5); }
+.dot-off    { background: var(--text3); }
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.badge-v   { background: rgba(96,165,250,.12);  color: var(--blue);   border: 1px solid rgba(96,165,250,.2); }
+.badge-m   { background: rgba(248,113,113,.12); color: var(--red);    border: 1px solid rgba(248,113,113,.2); }
+.badge-g   { background: rgba(52,211,153,.12);  color: var(--green);  border: 1px solid rgba(52,211,153,.2); }
+.badge-y   { background: rgba(251,191,36,.12);  color: var(--yellow); border: 1px solid rgba(251,191,36,.2); }
+.badge-p   { background: rgba(244,114,182,.12); color: var(--pink);   border: 1px solid rgba(244,114,182,.2); }
+.badge-o   { background: rgba(251,146,60,.12);  color: var(--orange); border: 1px solid rgba(251,146,60,.2); }
+.badge-acc { background: rgba(124,106,255,.12); color: var(--accent2);border: 1px solid rgba(124,106,255,.2); }

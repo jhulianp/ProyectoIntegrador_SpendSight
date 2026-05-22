@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpendSight — Categorias</title>
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+<link rel="stylesheet" href="../css/components.css">
+<link rel="stylesheet" href="../css/categorias.css">
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <div class="logo-icon">SS</div>
+    <span class="logo-text">SpendSight</span>
+  </div>
+  <a class="nav-item" href="dashboard.html">
+    <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+    <span class="nav-label">Dashboard</span>
+  </a>
+  <a class="nav-item" href="gastos.html">
+    <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></span>
+    <span class="nav-label">Gastos</span>
+  </a>
+  <a class="nav-item" href="medios.html">
+    <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
+    <span class="nav-label">Medios de Pago</span>
+  </a>
+  <a class="nav-item" href="categorias.html">
+    <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+    <span class="nav-label">Categorias</span>
+  </a>
+  <a class="nav-item" href="comercios.html">
+    <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    <span class="nav-label">Comercios</span>
+  </a>
+  <div class="sidebar-bottom">
+    <a class="nav-item" href="config.html">
+      <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span>
+      <span class="nav-label">Mi Cuenta</span>
+    </a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Categorias</div>
+    <div class="topbar-right">
+      <span class="chip"><span class="chip-dot"></span>En linea</span>
+      <span class="topbar-username" id="topbar-username"></span>
+      <a class="avatar" id="topbar-avatar" href="config.html" title="Mi cuenta">SS</a>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="page active" id="page-categorias">
+    <div class="page-header">
+      <div>
+        <div class="section-title">Categorias</div>
+        <div class="section-sub">Organiza tus gastos por tipo</div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('modal-cat');clearForm('cat')">
+        + Nueva categoria
+      </button>
+    </div>
+
+    <div class="cat-cards-grid" id="cat-cards-grid"></div>
+
+    <div class="table-wrap">
+      <div class="table-head">
+        <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:14px">Todas las categorias</div>
+        <div class="table-search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar..." id="cat-search" oninput="renderCategorias()">
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>Nombre</th><th>Icono</th><th>Color</th>
+            <th>Tipo</th><th>Estado</th><th>Gastos</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="cat-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Categoria ══ -->
+<div class="modal-overlay" id="modal-cat">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-cat-title">Nueva Categoria</span>
+      <button class="modal-close" onclick="closeModal('modal-cat')">x</button>
+    </div>
+    <input type="hidden" id="cat-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nombre *</label>
+        <input class="form-input" id="cat-nombre" placeholder="Ej: Alimentacion">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" id="cat-tipo">
+          <option>Gasto</option><option>Ingreso</option><option>Ahorro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Icono (letra clave)</label>
+      <div class="icon-picker-row" id="icon-picker"></div>
+      <input type="hidden" id="cat-icono" value="F">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Color</label>
+      <div class="color-picker-row" id="color-picker"></div>
+      <input type="hidden" id="cat-color" value="#7c6aff">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select class="form-select" id="cat-estado">
+          <option>Activo</option><option>Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-cat')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCategoria()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">!</div>
+    <div class="confirm-title" id="confirm-title">Estas seguro?</div>
+    <div class="confirm-msg"   id="confirm-msg">Esta accion no se puede deshacer.</div>
+    <div class="confirm-btns">
+      <button class="btn btn-ghost"  onclick="closeConfirm()">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmOk()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script src="../js/storage.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/shell.js"></script>
+<script src="../js/categorias.js"></script>
+<script>
+  seed();
+  renderCategorias();
+</script>
+</body>
+</html>
