@@ -5,14 +5,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import java.time.LocalDate;
 import java.math.BigDecimal;
 import com.example.SpendSight.Modelos.utils.EstadoGasto;
-import java.util.List;
+
 
 @Entity
 @Table(name = "gastos")

@@ -10,7 +10,6 @@ import jakarta.persistence.Enumerated;
 import com.example.SpendSight.Modelos.utils.TipoComercio;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
-import java.util.List;
 
 /**
  * id,nit,nombre,actividad,contacto(correo),telefono,direccion,ciudad,pais,tipo(comercio/servicio)

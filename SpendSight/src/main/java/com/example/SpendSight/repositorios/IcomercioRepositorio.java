@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.example.SpendSight.Modelos.Comercio;
 
 @Repository
-public interface IcomercioRepositorio extends JpaRepository<Comercio,Integer> {
+public interface IComercioRepositorio extends JpaRepository<Comercio,Integer> {
     
  List<Comercio> findByNombre(String nombre);
  List<Comercio> findByNit(Number Nit);

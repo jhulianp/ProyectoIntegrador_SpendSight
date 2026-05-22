@@ -3,7 +3,6 @@ package com.example.SpendSight.Repositorios;
 
 
 import java.util.List;
-import java.util.Locale.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.SpendSight.Modelos.Categoria;
 

@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import com.example.SpendSight.Modelos.Comercio;
 
-import com.example.SpendSight.Repositorios.IcomercioRepositorio;
+import com.example.SpendSight.Repositorios.IComercioRepositorio;
 
 
 @Service
-public class comercioServicio {
+public class ComercioServicio {
     
     @Autowired
-    private IcomercioRepositorio repositorio;
+    private IComercioRepositorio repositorio;
 
     public Comercio guardarComercio(Comercio datosComercio) {
         if (datosComercio.getNombre() == null) {
