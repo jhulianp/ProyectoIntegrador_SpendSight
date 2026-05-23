@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { fmtCOP, loadStorage, saveStorage } from '../utils/storage';
+import { fmtCOP } from '../utils/storage';
+import { gastosResource, categoriasResource, mediosPagoResource, comerciosResource } from '../utils/resources';
 import '../Styles/gastos.css';
 
 export default function Gastos() {
@@ -61,19 +62,14 @@ export default function Gastos() {
     }
   };
 
-  const loadData = () => {
-    // Usamos las utilidades estándar del proyecto
-    const rawGastos = loadStorage(`ss_gastos${suffix}`, []); // suffix will be like _user@email.com
+  const loadData = async () => {
+    // Cargar primero las entidades relacionadas (necesarias para resolver FKs en Gastos)
+    const [cats, meds, coms] = await Promise.all([
+      categoriasResource.list(),
+      mediosPagoResource.list(),
+      comerciosResource.list(),
+    ]);
 
-    const sanitizedGastos = rawGastos.map(g => ({
-      ...g,
-      categoria: typeof g.categoria === 'object' && g.categoria !== null ? (g.categoria.nombre || '') : String(g.categoria || ''),
-      medioPago: typeof g.medioPago === 'object' && g.medioPago !== null ? (g.medioPago.nombre || '') : String(g.medioPago || ''),
-      comercio: typeof g.comercio === 'object' && g.comercio !== null ? (g.comercio.nombre || '') : String(g.comercio || '')
-    }));
-    setGastos(sanitizedGastos);
-
-    // Restauramos categorías básicas para que el modal funcione y no esté vacío
     const defaultCats = [
       { id: 'Comida', nombre: 'Comida' },
       { id: 'Transporte', nombre: 'Transporte' },
@@ -81,19 +77,35 @@ export default function Gastos() {
       { id: 'Servicios', nombre: 'Servicios' },
       { id: 'Otros', nombre: 'Otros' }
     ];
-    const loadedCats = loadStorage(`ss_categorias${suffix}`, defaultCats);
-    setCategorias(loadedCats.length > 0 ? loadedCats : defaultCats);
-
     const defaultPayments = [
       { id: 'Efectivo', nombre: 'Efectivo' },
       { id: 'Tarjeta Débito', nombre: 'Tarjeta Débito' },
       { id: 'Tarjeta Crédito', nombre: 'Tarjeta Crédito' },
       { id: 'Billetera Digital', nombre: 'Billetera Digital' }
     ];
-    const loadedPayments = loadStorage(`ss_medios_pago${suffix}`, defaultPayments);
-    setMediosPago(loadedPayments.length > 0 ? loadedPayments : defaultPayments);
 
-    setComerciosData(loadStorage(`ss_comercios${suffix}`, []));
+    const categoriasFinales = cats.length > 0 ? cats : defaultCats;
+    const mediosFinales = meds.length > 0 ? meds : defaultPayments;
+
+    setCategorias(categoriasFinales);
+    setMediosPago(mediosFinales);
+    setComerciosData(coms);
+
+    // Ahora cargar los gastos usando las entidades como contexto para resolver FKs
+    const gastosBack = await gastosResource.list({
+      categorias: categoriasFinales,
+      mediosPago: mediosFinales,
+      comercios: coms,
+      session: JSON.parse(localStorage.getItem('ss_session') || 'null'),
+    });
+
+    const sanitizedGastos = gastosBack.map(g => ({
+      ...g,
+      categoria: typeof g.categoria === 'object' && g.categoria !== null ? (g.categoria.nombre || '') : String(g.categoria || ''),
+      medioPago: typeof g.medioPago === 'object' && g.medioPago !== null ? (g.medioPago.nombre || '') : String(g.medioPago || ''),
+      comercio: typeof g.comercio === 'object' && g.comercio !== null ? (g.comercio.nombre || '') : String(g.comercio || '')
+    }));
+    setGastos(sanitizedGastos);
   };
 
   const resetData = () => {
@@ -138,49 +150,52 @@ export default function Gastos() {
     setFormData({ ...formData, [field]: safeValue });
   };
 
-  const handleSaveGasto = () => {
+  const handleSaveGasto = async () => {
     if (!formData.descripcion || !formData.valor || !formData.categoria || !formData.medioPago) {
       alert('Por favor completa los campos requeridos');
       return;
     }
 
     const valorNumerico = parseFloat(formData.valor) || 0;
-    const gastoToSave = { ...formData, valor: valorNumerico };
-    let currentComercios = [...comercios];
+    const gastoToSave = { ...formData, valor: valorNumerico, id: editingId || formData.id };
+    const ctx = {
+      categorias,
+      mediosPago,
+      comercios,
+      session: JSON.parse(localStorage.getItem('ss_session') || 'null'),
+    };
+
+    const saved = await gastosResource.save(gastoToSave, ctx);
+
     let updatedGastos;
-    
     if (editingId) {
-      updatedGastos = gastos.map(g => g.id === editingId ? { ...gastoToSave, id: editingId } : g);
+      updatedGastos = gastos.map(g => g.id === editingId ? { ...saved, id: editingId } : g);
     } else {
-      const newGasto = { ...gastoToSave, id: Date.now() };
-      updatedGastos = [...gastos, newGasto];
+      updatedGastos = [...gastos, saved];
     }
-
     setGastos(updatedGastos);
-    saveStorage(`ss_gastos${suffix}`, updatedGastos);
 
-    // Guardar nuevo comercio si no existe en la lista
-    if (gastoToSave.comercio && typeof gastoToSave.comercio === 'string' && gastoToSave.comercio.trim() !== '' && !currentComercios.some(c => (c.nombre || c) === gastoToSave.comercio)) {
-      const newComercios = [...currentComercios, { id: gastoToSave.comercio, nombre: gastoToSave.comercio }];
+    // Guardar nuevo comercio si no existe en la lista (también en backend)
+    if (saved.comercio && typeof saved.comercio === 'string' && saved.comercio.trim() !== '' && !comercios.some(c => (c.nombre || c) === saved.comercio)) {
+      const nuevoComercio = await comerciosResource.save({ nombre: saved.comercio, tipo: 'Comercio' });
+      const newComercios = [...comercios, nuevoComercio];
       setComerciosData(newComercios);
-      saveStorage(`ss_comercios${suffix}`, newComercios);
     }
-    
+
     setShowModal(false);
-    setShowConfirm(false); // Asegurarse de que el diálogo de confirmación se cierre después de guardar
+    setShowConfirm(false);
   };
 
   const handleDeleteGasto = (gasto) => {
     if (!gasto) return;
     setConfirmTitle('¿Eliminar gasto?');
     setConfirmMsg(`¿Estás seguro de eliminar "${gasto.descripcion}"? Esta acción no se puede deshacer.`);
-    // IMPORTANTE: Para guardar una función en el estado se usa la sintaxis (() => () => { ... })
-    setConfirmAction(() => () => {
+    setConfirmAction(() => async () => {
+      await gastosResource.remove(gasto.id);
       const filtered = gastos.filter(g => g.id !== gasto.id);
       setGastos(filtered);
-      saveStorage(`ss_gastos${suffix}`, filtered);
-      setShowConfirm(false); // Cerrar el diálogo de confirmación después de la acción
-      setConfirmAction(null); // Limpiar la acción
+      setShowConfirm(false);
+      setConfirmAction(null);
     });
     setShowConfirm(true);
   };

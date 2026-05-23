@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fmtCOP, loadStorage, saveStorage } from '../utils/storage';
+import { fmtCOP, loadStorage } from '../utils/storage';
+import { categoriasResource } from '../utils/resources';
 import '../Styles/categorias.css';
 
 const DEFAULT_COLORS = ['#7c6aff', '#f472b6', '#60a5fa', '#34d399', '#fb923c', '#fbbf24', '#f97316'];
@@ -32,13 +33,14 @@ export default function CategoriasPage() {
 
   useEffect(() => {
     if (suffix !== null) {
-      const stored = loadStorage(`ss_categorias${suffix}`, []);
-      if (stored.length) {
-        setCategories(stored);
-      } else {
-        setCategories(DEFAULT_CATEGORIES); // Default categories for new users
-        saveStorage(`ss_categorias${suffix}`, DEFAULT_CATEGORIES);
-      }
+      // Cargar desde el back (con fallback a localStorage automático en categoriasResource)
+      categoriasResource.list().then((list) => {
+        if (list.length) {
+          setCategories(list);
+        } else {
+          setCategories(DEFAULT_CATEGORIES);
+        }
+      });
     } else setCategories([]); // Clear if no session
   }, [suffix]);
 
@@ -69,26 +71,24 @@ export default function CategoriasPage() {
     setForm(EMPTY_FORM);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.nombre.trim()) {
       setToast({ message: 'El nombre es obligatorio', variant: 'error' });
       return;
     }
 
+    const saved = await categoriasResource.save(form);
     const next = [...categories];
     if (form.id) {
-      const index = next.findIndex((item) => item.id === form.id);
-      if (index > -1) {
-        next[index] = { ...next[index], ...form, fechaCreacion: next[index].fechaCreacion || new Date().toISOString() };
-      }
+      const index = next.findIndex((item) => item.id === saved.id);
+      if (index > -1) next[index] = { ...next[index], ...saved };
       setToast({ message: 'Categoria actualizada', variant: 'success' });
     } else {
-      next.push({ ...form, id: Date.now(), fechaCreacion: new Date().toISOString() });
+      next.push(saved);
       setToast({ message: 'Categoria creada', variant: 'success' });
     }
 
     setCategories(next);
-    saveStorage(`ss_categorias${suffix}`, next);
     closeModal();
   };
 
@@ -97,10 +97,10 @@ export default function CategoriasPage() {
     setIsModalOpen(false);
   }; 
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
+    await categoriasResource.remove(confirm.id);
     const next = categories.filter((categoria) => categoria.id !== confirm.id);
     setCategories(next);
-    saveStorage(`ss_categorias${suffix}`, next);
     setConfirm({ open: false, id: null });
     setToast({ message: 'Categoria eliminada', variant: 'info' });
   };

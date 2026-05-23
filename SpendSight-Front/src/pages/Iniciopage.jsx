@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../Styles/Inicio.css';
-import Footer from '../components/footer.jsx';
+import Footer from '../components/Footer.jsx';
 
 const features = [
   {

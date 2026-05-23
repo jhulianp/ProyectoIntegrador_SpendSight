@@ -8,12 +8,15 @@ import MediosPagoPage from './pages/MediosPagoPage';
 import ConfigPage from './pages/ConfigPage';
 import LoginPage from './pages/LoginPage';
 import LandingPage from './pages/Iniciopage';
+import ToastHost from './components/ToastHost';
 
 export default function App() {
   const session = localStorage.getItem('ss_session');
 
   return (
-    <Routes>
+    <>
+      <ToastHost />
+      <Routes>
       {/* Página de inicio pública */}
       <Route path="/" element={session ? <Navigate replace to="/dashboard" /> : <LandingPage />} />
 
@@ -35,5 +38,6 @@ export default function App() {
       {/* Fallback */}
       <Route path="*" element={<Navigate replace to={session ? "/dashboard" : "/"} />} />
     </Routes>
+    </>
   );
 }

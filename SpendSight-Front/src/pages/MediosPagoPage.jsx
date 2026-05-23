@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fmtCOP, loadStorage, saveStorage } from '../utils/storage';
+import { fmtCOP, loadStorage } from '../utils/storage';
+import { mediosPagoResource } from '../utils/resources';
 import '../Styles/categorias.css';
 
 const DEFAULT_MEDIOS = [
@@ -46,13 +47,9 @@ export default function MediosPagoPage() {
 
   useEffect(() => {
     if (suffix !== null) {
-      const stored = loadStorage(`ss_medios_pago${suffix}`, []);
-      if (stored.length) {
-        setMediosPago(stored);
-      } else {
-        setMediosPago(DEFAULT_MEDIOS);
-        saveStorage(`ss_medios_pago${suffix}`, DEFAULT_MEDIOS);
-      }
+      mediosPagoResource.list().then((list) => {
+        setMediosPago(list.length ? list : DEFAULT_MEDIOS);
+      });
     } else {
       setMediosPago([]);
     }
@@ -94,24 +91,24 @@ export default function MediosPagoPage() {
     setForm(EMPTY_FORM);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.nombre.trim()) {
       setToast({ message: 'El nombre es obligatorio', variant: 'error' });
       return;
     }
 
+    const saved = await mediosPagoResource.save(form);
     const next = [...mediosPago];
     if (form.id) {
-      const index = next.findIndex((item) => item.id === form.id);
-      if (index > -1) next[index] = { ...next[index], ...form };
+      const index = next.findIndex((item) => item.id === saved.id);
+      if (index > -1) next[index] = { ...next[index], ...saved };
       setToast({ message: 'Medio de pago actualizado', variant: 'success' });
     } else {
-      next.push({ ...form, id: Date.now(), fechaCreacion: new Date().toISOString() });
+      next.push(saved);
       setToast({ message: 'Medio de pago creado', variant: 'success' });
     }
 
     setMediosPago(next);
-    saveStorage(`ss_medios_pago${suffix}`, next);
     closeModal();
   };
 
@@ -121,10 +118,10 @@ export default function MediosPagoPage() {
     setDetailId(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
+    await mediosPagoResource.remove(confirm.id);
     const next = mediosPago.filter((medio) => medio.id !== confirm.id);
     setMediosPago(next);
-    saveStorage(`ss_medios_pago${suffix}`, next);
     setConfirm({ open: false, id: null });
     setToast({ message: 'Medio de pago eliminado', variant: 'info' });
   };

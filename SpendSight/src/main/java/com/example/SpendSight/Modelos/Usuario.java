@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import com.example.SpendSight.Modelos.utils.EstadoUsuario;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "usuarios")
@@ -39,6 +40,11 @@ public class Usuario {
     @Column(name = "estado", nullable = false, unique = false)
     @Enumerated(EnumType.STRING)
     private EstadoUsuario estado;
+
+    //Contraseña (SHA-256 hash, se llena solo en /api/auth/register y se valida en /api/auth/login)
+    @Column(name = "password", nullable = true, length = 200)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String password;
 
     //Creando una relacion con el modelo de gasto
 
@@ -163,5 +169,13 @@ public class Usuario {
 
     public void setEstado(EstadoUsuario estado) {
         this.estado = estado;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

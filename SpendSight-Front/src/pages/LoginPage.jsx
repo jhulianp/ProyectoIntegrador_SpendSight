@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import '../Styles/auth.css';
 import '../Styles/Inicio.css';
 import Footer from '../components/Footer.jsx';
+import { apiCall, ENDPOINTS } from '../utils/api';
+import { notify } from '../utils/toastBus';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -38,13 +40,41 @@ export default function LoginPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const { email, password } = form;
     if (!email || !password) {
       setAlert({ type: 'error', message: 'Ingresa tu correo y contraseña.' });
       return;
     }
 
+    // 1) Intentar contra el back
+    const resp = await apiCall(ENDPOINTS.auth.login, {
+      method: 'POST',
+      body: { correo: email, password },
+      silent: true,
+    });
+
+    if (resp.ok && resp.data) {
+      const session = {
+        ...resp.data,
+        email: resp.data.correo,
+        avatar: (resp.data.nombres || 'U')[0].toUpperCase(),
+      };
+      localStorage.removeItem('ss_session');
+      localStorage.setItem('ss_session', JSON.stringify(session));
+      notify({ message: 'Inicio de sesión exitoso', variant: 'success' });
+      window.location.href = '/dashboard';
+      return;
+    }
+
+    // 2) Si el back respondió con 401/400, son credenciales incorrectas
+    if (!resp.offline) {
+      setAlert({ type: 'error', message: resp.error || 'Credenciales incorrectas.' });
+      return;
+    }
+
+    // 3) Fallback offline: validar contra localStorage
+    notify({ message: '⚠ Backend no disponible — validando con datos locales', variant: 'warning' });
     const users = JSON.parse(localStorage.getItem('ss_usuarios') || '[]');
     const user = users.find(u => u.email === email && u.pass === btoa(password));
 
@@ -59,7 +89,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const { nombres, apellidos, email, password, confirmPassword, fechaNacimiento, telefono, direccion, ciudad, pais } = form;
     if (!nombres || !email || !password) {
       setAlert({ type: 'error', message: 'Completa los campos obligatorios.' });
@@ -74,6 +104,57 @@ export default function LoginPage() {
       return;
     }
 
+    // Construimos el payload con los campos esperados por el back (Usuario)
+    const edad = (() => {
+      if (!fechaNacimiento) return 18;
+      const d = new Date(fechaNacimiento);
+      const diff = Date.now() - d.getTime();
+      return Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25)));
+    })();
+
+    const payload = {
+      nombres: `${nombres} ${apellidos || ''}`.trim(),
+      correo: email,
+      password,
+      edad,
+      telefono: telefono || '',
+      direccion: direccion || '',
+      ciudad: ciudad || '',
+      pais: pais || 'Colombia',
+      tipoDocumento: 'cedula',
+      estado: 'Activo',
+    };
+
+    const resp = await apiCall(ENDPOINTS.auth.register, {
+      method: 'POST',
+      body: payload,
+      silent: true,
+    });
+
+    if (resp.ok && resp.data) {
+      const session = {
+        ...resp.data,
+        email: resp.data.correo,
+        nombres,
+        apellidos,
+        fechaNacimiento,
+        avatar: (nombres || 'U')[0].toUpperCase(),
+      };
+      localStorage.removeItem('ss_session');
+      localStorage.setItem('ss_session', JSON.stringify(session));
+      notify({ message: 'Cuenta creada exitosamente', variant: 'success' });
+      window.location.href = '/dashboard';
+      return;
+    }
+
+    // Si el back respondió con error de negocio (409 conflicto, etc.)
+    if (!resp.offline) {
+      setAlert({ type: 'error', message: resp.error || 'No se pudo registrar.' });
+      return;
+    }
+
+    // Fallback offline: registrar en localStorage como antes
+    notify({ message: '⚠ Backend no disponible — registrando localmente', variant: 'warning' });
     const users = JSON.parse(localStorage.getItem('ss_usuarios') || '[]');
     if (users.some(u => u.email === email)) {
       setAlert({ type: 'error', message: 'Este correo ya está registrado.' });
@@ -98,7 +179,6 @@ export default function LoginPage() {
     users.push(newUser);
     localStorage.setItem('ss_usuarios', JSON.stringify(users));
 
-    // Auto-login
     localStorage.removeItem('ss_session');
     const session = { ...newUser };
     delete session.pass;

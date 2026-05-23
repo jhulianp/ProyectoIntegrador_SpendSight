@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fmtCOP, loadStorage, saveStorage } from '../utils/storage';
+import { fmtCOP, loadStorage } from '../utils/storage';
+import { comerciosResource } from '../utils/resources';
 import '../Styles/categorias.css';
 
 const DEFAULT_COMERCIOS = [
@@ -59,12 +60,9 @@ export default function ComerciosPage() {
 
   useEffect(() => {
     if (suffix !== null) {
-      const stored = loadStorage(`ss_comercios${suffix}`, []);
-      if (stored.length) {
-        setComercios(stored);
-      } else {
-        setComercios([]); // No default comercios for new users, they will add their own
-      }
+      comerciosResource.list().then((list) => {
+        setComercios(list);
+      });
     } else setComercios([]); // Clear if no session
   }, [suffix]);
 
@@ -102,24 +100,24 @@ export default function ComerciosPage() {
     setForm(EMPTY_FORM);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.nombre.trim()) {
       setToast({ message: 'El nombre es obligatorio', variant: 'error' });
       return;
     }
 
+    const saved = await comerciosResource.save(form);
     const next = [...comercios];
     if (form.id) {
-      const index = next.findIndex((item) => item.id === form.id);
-      if (index > -1) next[index] = { ...next[index], ...form };
+      const index = next.findIndex((item) => item.id === saved.id);
+      if (index > -1) next[index] = { ...next[index], ...saved };
       setToast({ message: 'Comercio actualizado', variant: 'success' });
     } else {
-      next.push({ ...form, id: Date.now(), fechaCreacion: new Date().toISOString() });
+      next.push(saved);
       setToast({ message: 'Comercio registrado', variant: 'success' });
     }
 
     setComercios(next);
-    saveStorage(`ss_comercios${suffix}`, next);
     closeModal();
   };
 
@@ -129,10 +127,10 @@ export default function ComerciosPage() {
     setDetailId(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
+    await comerciosResource.remove(confirm.id);
     const next = comercios.filter((item) => item.id !== confirm.id);
     setComercios(next);
-    saveStorage(`ss_comercios${suffix}`, next);
     setConfirm({ open: false, id: null });
     setToast({ message: 'Comercio eliminado', variant: 'info' });
   };
