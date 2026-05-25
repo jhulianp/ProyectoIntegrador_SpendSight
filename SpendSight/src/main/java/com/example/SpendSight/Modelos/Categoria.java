@@ -1,6 +1,8 @@
 package com.example.SpendSight.Modelos;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
@@ -17,7 +19,8 @@ import com.example.SpendSight.Modelos.utils.TipoCategoria;
 @Table(name = "categoria")
 public class Categoria {
     @Id
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     @Column(name = "nombre", nullable = false, length = 40)
     private String nombre;
     @Column(name = "descripcion", nullable = true, length = 255)
@@ -32,7 +35,7 @@ public class Categoria {
     private TipoCategoria tipo;
     @Column(name = "fecha_creacion", nullable = false, length = 30)
     private String fechaCreacion;
-    @Column(name = "fecha_modificacion", nullable = true, length = 20)
+    @Column(name = "fecha_modificacion", nullable = true, length = 50)
     private String fechaModificacion;
     @Column(name = "usuario_creacion", nullable = false, length = 50)
     private String usuarioCreacion;
@@ -50,7 +53,7 @@ public class Categoria {
     public Categoria() {
     }
 
-    public Categoria(int id, String nombre, String descripcion, String icono, EstadoCategoria estado, TipoCategoria tipo, String fechaCreacion, String fechaModificacion, String usuarioCreacion, String usuarioModificacion) {
+    public Categoria(Integer id, String nombre, String descripcion, String icono, EstadoCategoria estado, TipoCategoria tipo, String fechaCreacion, String fechaModificacion, String usuarioCreacion, String usuarioModificacion) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -63,11 +66,11 @@ public class Categoria {
         this.usuarioModificacion = usuarioModificacion;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

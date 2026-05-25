@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -16,7 +18,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Table(name = "usuarios")
 public class Usuario {
     @Id
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     
     @Column(name = "nombres", nullable = false, unique = false, length = 50)
     private String nombres;
@@ -26,7 +29,7 @@ public class Usuario {
     @Column(name = "documento", nullable = false, unique = true, length = 20)
     private String documento;
     @Column(name = "edad", nullable = false, unique = false, length = 3)
-    private int edad;
+    private Integer edad;
     @Column(name = "correo", nullable = false, unique = true, length = 50)
     private String correo;
     @Column(name = "telefono", nullable = false, unique = false, length = 20)
@@ -67,8 +70,8 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(int id, String nombres, TipoDocumento tipoDocumento, String documento,
-                int edad, String correo, String telefono,
+    public Usuario(Integer id, String nombres, TipoDocumento tipoDocumento, String documento,
+                Integer edad, String correo, String telefono,
                 String direccion, String ciudad, String pais, EstadoUsuario estado) {
         this.id = id;
         this.nombres = nombres;
@@ -83,11 +86,11 @@ public class Usuario {
         this.estado = estado;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -115,11 +118,11 @@ public class Usuario {
         this.documento = documento;
     }
 
-    public int getEdad() {
+    public Integer getEdad() {
         return edad;
     }
 
-    public void setEdad(int edad) {
+    public void setEdad(Integer edad) {
         this.edad = edad;
     }
 

@@ -1,6 +1,8 @@
 package com.example.SpendSight.Modelos;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
@@ -15,8 +17,9 @@ import com.example.SpendSight.Modelos.utils.EstadoMedioPago;
 public class MedioPago {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private int id;
+    private Integer id;
     @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
     @Column(name = "franquicia", nullable = true, length = 50)
@@ -35,7 +38,7 @@ public class MedioPago {
     public MedioPago() {
     }
 
-    public MedioPago(int id, String nombre, String franquicia, EstadoMedioPago estado, Usuario usuario) {
+    public MedioPago(Integer id, String nombre, String franquicia, EstadoMedioPago estado, Usuario usuario) {
         this.id = id;
         this.nombre = nombre;
         this.franquicia = franquicia;
@@ -43,11 +46,11 @@ public class MedioPago {
         this.usuario = usuario;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

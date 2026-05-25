@@ -16,6 +16,9 @@ public class UsuarioServicio {
     //servicio para guardar un usuario
     public Usuario guardar_usuario(Usuario datosUsuario){
 
+        // Aseguramos que el ID sea nulo para creación
+        datosUsuario.setId(null);
+
         //validar la operacion que me estan pidiendo hacer
         if(datosUsuario.getNombres()==null || datosUsuario.getNombres().isBlank() || datosUsuario.getNombres().isEmpty()){
 
@@ -55,7 +58,7 @@ public class UsuarioServicio {
 
     //servicio para modificar un usuario en bd
     public Usuario modificar_usuario(Usuario usuario) {
-        if (usuario.getId() == 0) {
+        if (usuario.getId() == null || usuario.getId() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID del usuario es obligatorio para modificar");
         }
         if (usuario.getNombres() == null || usuario.getNombres().isBlank() || usuario.getNombres().isEmpty()) {

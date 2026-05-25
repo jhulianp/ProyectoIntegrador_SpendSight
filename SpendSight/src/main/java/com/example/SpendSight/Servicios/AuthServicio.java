@@ -54,9 +54,9 @@ public class AuthServicio {
         }
 
         // Rellenar valores por defecto requeridos por el esquema (nullable=false)
-        if (datos.getId() == 0) {
-            datos.setId(ThreadLocalRandom.current().nextInt(1, 2_000_000_000));
-        }
+        // Forzamos el ID a null para asegurar que JPA realice un INSERT y no un UPDATE
+        datos.setId(null);
+
         if (datos.getNombres() == null || datos.getNombres().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Los nombres son obligatorios");
         }
@@ -65,7 +65,7 @@ public class AuthServicio {
             // En el registro vía login no exigimos documento real; generamos uno único derivado del correo
             datos.setDocumento("AUTO-" + Math.abs(datos.getCorreo().hashCode()));
         }
-        if (datos.getEdad() == 0) datos.setEdad(18);
+        if (datos.getEdad() == null || datos.getEdad() == 0) datos.setEdad(18);
         if (datos.getTelefono() == null) datos.setTelefono("");
         if (datos.getDireccion() == null) datos.setDireccion("");
         if (datos.getCiudad() == null) datos.setCiudad("");

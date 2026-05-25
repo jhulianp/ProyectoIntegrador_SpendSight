@@ -22,3 +22,11 @@ The connection was not closed by the application and is garbage collected [90018
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:690)
 	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
 	... 16 more
+2026-05-25 10:14:30.178671-05:00 jdbc[88]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "FECHA_MODIFICACION CHARACTER VARYING(20)": "'2026-05-25T15:14:30.101Z' (24)"
+Value too long for column "FECHA_MODIFICACION CHARACTER VARYING(20)": "'2026-05-25T15:14:30.101Z' (24)"; SQL statement:
+insert into categoria (descripcion,estado,fecha_creacion,fecha_modificacion,icono,nombre,tipo,fk_usuario,usuario_creacion,usuario_modificacion,id) values (?,?,?,?,?,?,?,?,?,?,default) [22001-240]
+2026-05-25 10:14:49.179060-05:00 jdbc[88]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "FECHA_MODIFICACION CHARACTER VARYING(20)": "'2026-05-25T15:14:49.152Z' (24)"
+Value too long for column "FECHA_MODIFICACION CHARACTER VARYING(20)": "'2026-05-25T15:14:49.152Z' (24)"; SQL statement:
+insert into categoria (descripcion,estado,fecha_creacion,fecha_modificacion,icono,nombre,tipo,fk_usuario,usuario_creacion,usuario_modificacion,id) values (?,?,?,?,?,?,?,?,?,?,default) [22001-240]

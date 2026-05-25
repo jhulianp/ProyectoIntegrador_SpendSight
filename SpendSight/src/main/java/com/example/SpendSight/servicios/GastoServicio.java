@@ -15,6 +15,9 @@ public class GastoServicio {
     //Se programa una funcion por cada servicio que voy a ofrecer-----------------------------------------------------
     //funcion para guardar un Gasto-----------------------------------------------------------------------------------
     public Gasto guardarGasto(Gasto datosGasto) {
+        // Forzamos el ID a null para asegurar la creación de un nuevo registro
+        datosGasto.setId(null);
+
         //validar la operacion que me estan pidiendo que hacer:-------------------------------------------------------
         if (datosGasto.getDescripcion() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La descripcion no puede estar vacia");}

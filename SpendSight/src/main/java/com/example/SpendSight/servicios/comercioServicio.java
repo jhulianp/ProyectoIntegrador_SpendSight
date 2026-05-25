@@ -18,6 +18,9 @@ public class ComercioServicio {
     private IComercioRepositorio repositorio;
 
     public Comercio guardarComercio(Comercio datosComercio) {
+        // Aseguramos que el ID sea nulo para forzar la inserción
+        datosComercio.setId(null);
+
         if (datosComercio.getNombre() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre es obligatorio");
         }

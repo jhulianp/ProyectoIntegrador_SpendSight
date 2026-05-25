@@ -17,6 +17,8 @@ public class MedioPagoServicio {
 
     public MedioPago guardar_medioPago(MedioPago datosMedioPago){
 
+        datosMedioPago.setId(null);
+
         if(datosMedioPago.getNombre()==null || datosMedioPago.getNombre().isEmpty() || datosMedioPago.getNombre().isBlank()){
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
