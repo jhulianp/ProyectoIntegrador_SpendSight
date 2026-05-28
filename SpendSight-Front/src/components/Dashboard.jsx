@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { fmtCOP, loadStorage } from '../utils/storage';
+import { gastosResource, categoriasResource, mediosPagoResource, comerciosResource } from '../utils/resources';
 import '../Styles/dashboard.css';
 
 export default function Dashboard() {
@@ -15,164 +16,138 @@ export default function Dashboard() {
   const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
   const [monthFilter, setMonthFilter] = useState(-1);
 
-  // Identificar la sesión actual para usar las claves de almacenamiento correctas
-  const currentSession = useMemo(() => JSON.parse(localStorage.getItem('ss_session') || 'null'), []);
-  const suffix = useMemo(() => (currentSession ? `_${currentSession.email || currentSession.id}` : null), [currentSession]);
-  const configKey = useMemo(() => (currentSession ? `ss_config_${currentSession.email || currentSession.id}` : 'ss_config'), [currentSession]);
+  // Estados para Inteligencia Artificial y Limpieza en Python
+  const [pythonAnalysis, setPythonAnalysis] = useState(null);
+  const [loadingAnalysis, setLoadingAnalysis] = useState(false);
+  const [analysisError, setAnalysisError] = useState(null);
 
-  // Recuperar datos base desde el almacenamiento
-  const gastos = useMemo(() => (suffix !== null ? loadStorage(`ss_gastos${suffix}`, []) : []), [suffix]);
-  const categorias = useMemo(() => (suffix !== null ? loadStorage(`ss_categorias${suffix}`, []) : []), [suffix]);
-  const comercios = useMemo(() => (suffix !== null ? loadStorage(`ss_comercios${suffix}`, []) : []), [suffix]);
-  const mediosPago = useMemo(() => (suffix !== null ? loadStorage(`ss_medios_pago${suffix}`, []) : []), [suffix]);
+  // Estados para datos del backend
+  const [gastos, setGastos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [comercios, setComercios] = useState([]);
+  const [mediosPago, setMediosPago] = useState([]);
 
-  // Filtrar gastos por el periodo seleccionado
-  const filteredGastos = useMemo(() => {
-    return gastos.filter(g => {
-      const d = new Date(g.fecha);
-      const matchYear = d.getFullYear() === yearFilter;
-      const matchMonth = monthFilter === -1 || d.getMonth() === monthFilter;
-      return matchYear && matchMonth;
-    });
-  }, [gastos, yearFilter, monthFilter]);
-
-  // Procesar datos para la gráfica de barras (mensual)
-  const monthlyData = useMemo(() => {
-    const data = Array(12).fill(0);
-    gastos.forEach(g => {
-      const d = new Date(g.fecha);
-      if (d.getFullYear() === yearFilter) {
-        data[d.getMonth()] += (Number(g.valor) || 0);
-      }
-    });
-    return data;
-  }, [gastos, yearFilter]);
-
-  const maxMonthly = Math.max(...monthlyData, 1);
-
-  // Procesar distribución por categorías
-  const catDistribution = useMemo(() => {
-    const dist = {};
-    filteredGastos.forEach(g => {
-      const cat = g.categoria || 'Sin categoría';
-      dist[cat] = (dist[cat] || 0) + (Number(g.valor) || 0);
-    });
-    return Object.entries(dist).sort((a, b) => b[1] - a[1]);
-  }, [filteredGastos]);
-
-  // Obtener las últimas 5 transacciones del periodo
-  const recentTransactions = useMemo(() => {
-    return [...filteredGastos]
-      .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-      .slice(0, 5);
-  }, [filteredGastos]);
-
-  // Constante para la circunferencia del anillo (radio 48)
-  const circumference = 2 * Math.PI * 48;
-
-  // Calcular segmentos para el gráfico de anillo
-  const ringSegments = useMemo(() => {
-    if (stats.totalExpenses === 0) return [];
-
-    let cumulativeOffset = 0;
-    const segments = catDistribution.map(([name, val]) => {
-      const catInfo = categorias.find(c => c.nombre === name);
-      const color = catInfo?.color || 'var(--accent)';
-      const percentage = (val / stats.totalExpenses) * 100;
-      const segmentLength = (percentage / 100) * circumference;
-
-      const segment = { color, percentage, segmentLength, offset: cumulativeOffset };
-      cumulativeOffset += segmentLength;
-      return segment;
-    });
-    // Ordenar los segmentos para que el más grande esté al final y se dibuje encima de los más pequeños si hay superposición mínima
-    return segments.sort((a, b) => a.offset - b.offset);
-  }, [catDistribution, stats.totalExpenses, categorias, circumference]);
+  // Identificación de sesión y configuración
+  const session = useMemo(() => JSON.parse(localStorage.getItem('ss_session') || 'null'), []);
+  const suffix = useMemo(() => (session ? `_${session.email || session.id}` : null), [session]);
+  const configKey = useMemo(() => (session ? `ss_config_${session.email || session.id}` : 'ss_config'), [session]);
 
   useEffect(() => {
-    if (currentSession) initializeDashboard(); // Solo inicializar si hay una sesión activa
-    else resetDashboard(); // Limpiar el dashboard si no hay sesión
-  }, [yearFilter, monthFilter, gastos, suffix, currentSession]); 
+    if (session) {
+      loadAllData();
+    } else {
+      resetDashboard();
+    }
+  }, [yearFilter, monthFilter, suffix, session]);
 
-  const initializeDashboard = () => {
+  const loadAllData = async () => {
+    try {
+      const [g, c, m, co] = await Promise.all([
+        gastosResource.list(),
+        categoriasResource.list(),
+        mediosPagoResource.list(),
+        comerciosResource.list()
+      ]);
+      
+      setGastos(g);
+      setCategorias(c);
+      setMediosPago(m);
+      setComercios(co);
+      
+      initializeDashboard(g, c, m, co);
+      runPythonAnalysis(g);
+    } catch (err) {
+      console.error("Error cargando el dashboard", err);
+    }
+  };
+
+  const initializeDashboard = (dataGastos, dataCats, dataMeds, dataComs) => {
     const userConfig = loadStorage(configKey, {});
+    const filtered = dataGastos.filter(g => {
+      const d = new Date(g.fecha);
+      return d.getFullYear() === yearFilter && (monthFilter === -1 || d.getMonth() === monthFilter);
+    });
+
     setCurrentDate(new Date().toLocaleDateString('es-ES', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     }));
     
     setStats({
-      totalExpenses: filteredGastos.reduce((sum, g) => sum + (Number(g.valor) || 0), 0),
-      transactionCount: filteredGastos.length,
-      paymentMethods: mediosPago.length || 4,
-      categories: categorias.length || 5,
-      stores: comercios.length,
-      // Si el filtro es "Todo el año" (-1), multiplicamos el presupuesto mensual por 12
+      totalExpenses: filtered.reduce((sum, g) => sum + (Number(g.valor) || 0), 0),
+      transactionCount: filtered.length,
+      paymentMethods: dataMeds.length,
+      categories: dataCats.length,
+      stores: dataComs.length,
       budget: monthFilter === -1 ? (Number(userConfig.presupuesto || 0) * 12) : Number(userConfig.presupuesto || 0)
     });
   };
 
   const resetDashboard = () => {
-    setCurrentDate(new Date().toLocaleDateString('es-ES', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    }));
-    setStats({
-      totalExpenses: 0, transactionCount: 0, paymentMethods: 0, categories: 0, stores: 0, budget: 0
+    setCurrentDate(new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }));
+    setStats({ totalExpenses: 0, transactionCount: 0, paymentMethods: 0, categories: 0, stores: 0, budget: 0 });
+  };
+
+  const runPythonAnalysis = async (dataToAnalyze = gastos) => {
+    // Filtramos los datos por el periodo seleccionado (año y mes) antes de enviarlos
+    const filtered = dataToAnalyze.filter(g => {
+      const d = new Date(g.fecha);
+      return d.getFullYear() === yearFilter && (monthFilter === -1 || d.getMonth() === monthFilter);
     });
-    // También podrías limpiar los datos de gastos, categorías, etc. si fueran estados locales
-    // setGastos([]); setCategorias([]); etc.
+
+    if (!filtered.length) {
+      setPythonAnalysis(null);
+      return;
+    }
+
+    setLoadingAnalysis(true);
+    setAnalysisError(null);
+    try {
+      const response = await fetch('http://localhost:5000/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filtered),
+      });
+      const result = await response.json();
+      if (result.ok) setPythonAnalysis(result);
+      else throw new Error(result.error);
+    } catch (err) {
+      setAnalysisError(err.message || 'Error conectando con el motor Python');
+    } finally {
+      setLoadingAnalysis(false);
+    }
   };
 
   const monthsLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
   return (
     <div className="dashboard-container" style={{ color: 'white' }}>
-      <h1>Dashboard</h1>
-      <p>Fecha: {currentDate}</p>
-      
       <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
           <div className="section-title">Resumen General</div>
           <div className="section-sub">{currentDate}</div>
         </div>
-        <div className="filter-group">
-          <select 
-            className="form-select" 
-            value={yearFilter}
-            onChange={(e) => setYearFilter(Number(e.target.value))}
-          >
-            <option value={2024}>2024</option>
-            <option value={2025}>2025</option>
-            <option value={2026}>2026</option>
+        <div className="filter-group" style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn btn-ghost btn-sm" onClick={() => runPythonAnalysis()} disabled={loadingAnalysis}>
+            {loadingAnalysis ? 'Sincronizando...' : 'Recalcular'}
+          </button>
+          <select className="form-select" value={yearFilter} onChange={(e) => setYearFilter(Number(e.target.value))}>
+            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
           </select>
           <select 
             className="form-select" 
-            value={monthFilter}
+            value={monthFilter} 
             onChange={(e) => setMonthFilter(Number(e.target.value))}
           >
             <option value={-1}>Todo el año</option>
-            <option value={0}>Enero</option>
-            <option value={1}>Febrero</option>
-            <option value={2}>Marzo</option>
-            <option value={3}>Abril</option>
-            <option value={4}>Mayo</option>
-            <option value={5}>Junio</option>
-            <option value={6}>Julio</option>
-            <option value={7}>Agosto</option>
-            <option value={8}>Septiembre</option>
-            <option value={9}>Octubre</option>
-            <option value={10}>Noviembre</option>
-            <option value={11}>Diciembre</option>
+            {monthsLabels.map((name, idx) => (
+              <option key={idx} value={idx}>{name}</option>
+            ))}
           </select>
         </div>
       </div>
 
-      {/* Stats Cards */}
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon-wrap">
@@ -182,55 +157,36 @@ export default function Dashboard() {
           </div>
           <div className="stat-label">Gastos del periodo</div>
           <div className="stat-value" style={{ color: 'var(--red)' }}>
-            {fmtCOP(stats.totalExpenses)}
+            {pythonAnalysis ? fmtCOP(pythonAnalysis.charts.total) : '...'}
           </div>
-          <div className="stat-change">{stats.transactionCount} transacciones</div>
+          <div className="stat-change">{pythonAnalysis ? pythonAnalysis.charts.count : '...'} transacciones</div>
         </div>
 
-        {/* Nueva Tarjeta de Estadísticas para el Presupuesto */}
         <div className="stat-card">
           <div className="stat-icon-wrap">
             <svg viewBox="0 0 24 24">
-              <path d="M12 2c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7zm-1-10h2v6h-2z" />
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+              <polyline points="16 7 22 7 22 13" />
             </svg>
           </div>
-          <div className="stat-label">Presupuesto {monthFilter === -1 ? 'Anual' : 'Mensual'}</div>
+          <div className="stat-label">Proyección Próximo Mes</div>
           <div className="stat-value" style={{ color: 'var(--blue)' }}>
-            {fmtCOP(stats.budget)}
+            {pythonAnalysis ? fmtCOP(pythonAnalysis.projection.nextMonthProjected) : '...'}
           </div>
-          <div className="stat-change">establecido</div>
+          <div className="stat-change" style={{ color: pythonAnalysis?.projection.trend.includes('alza') ? 'var(--red)' : 'var(--green)' }}>
+            {pythonAnalysis?.projection.trend || 'Analizando...'}
+          </div>
         </div>
 
-        {/* Nueva Tarjeta de Saldo Disponible (Presupuesto - Gastos) */}
         <div className="stat-card">
           <div className="stat-icon-wrap">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
           </div>
           <div className="stat-label">Saldo Disponible</div>
-          <div className="stat-value" style={{ color: (stats.budget - stats.totalExpenses) >= 0 ? 'var(--green)' : 'var(--red)' }}>
-            {fmtCOP(stats.budget - stats.totalExpenses)}
+          <div className="stat-value" style={{ color: (stats.budget - (pythonAnalysis?.charts.total || 0)) >= 0 ? 'var(--green)' : 'var(--red)' }}>
+            {fmtCOP(stats.budget - (pythonAnalysis?.charts.total || 0))}
           </div>
-          <div className="stat-change">
-            {stats.budget > 0 
-              ? `${Math.max(0, ((1 - stats.totalExpenses / stats.budget) * 100)).toFixed(1)}% restante` 
-              : 'Sin presupuesto'}
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon-wrap">
-            <svg viewBox="0 0 24 24">
-              <rect x="1" y="4" width="22" height="16" rx="2" />
-              <line x1="1" y1="10" x2="23" y2="10" />
-            </svg>
-          </div>
-          <div className="stat-label">Medios de Pago</div>
-          <div className="stat-value" style={{ color: 'var(--accent3)' }}>
-            {stats.paymentMethods}
-          </div>
-          <div className="stat-change">activos</div>
+          <div className="stat-change">De {fmtCOP(stats.budget)}</div>
         </div>
 
         <div className="stat-card">
@@ -240,11 +196,11 @@ export default function Dashboard() {
               <line x1="7" y1="7" x2="7.01" y2="7" />
             </svg>
           </div>
-          <div className="stat-label">Categorias</div>
+          <div className="stat-label">Categorías</div>
           <div className="stat-value" style={{ color: 'var(--yellow)' }}>
             {stats.categories}
           </div>
-          <div className="stat-change">registradas</div>
+          <div className="stat-change">Categorías registradas</div>
         </div>
 
         <div className="stat-card">
@@ -258,28 +214,27 @@ export default function Dashboard() {
           <div className="stat-value" style={{ color: 'var(--green)' }}>
             {stats.stores}
           </div>
-          <div className="stat-change">registrados</div>
+          <div className="stat-change">Comercios registrados</div>
         </div>
+
       </div>
 
-      {/* Charts Grid */}
       <div className="charts-grid">
-        {/* Bar Chart */}
         <div className="card">
           <div className="card-title">
             Gastos por Mes <span className="card-badge">{yearFilter}</span>
           </div>
           <div className="chart-wrap" id="chart-bars">
-            {monthsLabels.map((month, idx) => (
-              <div key={month} className="bar-group">
+            {pythonAnalysis ? pythonAnalysis.charts.monthly.map((val, idx) => (
+              <div key={idx} className="bar-group">
                 <div 
                   className="bar" 
-                  style={{ height: `${(monthlyData[idx] / maxMonthly) * 100}%` }}
-                  title={`${month}: ${fmtCOP(monthlyData[idx])}`}
+                  style={{ height: `${(val / Math.max(...pythonAnalysis.charts.monthly, 1)) * 100}%` }}
+                  title={`${monthsLabels[idx]}: ${fmtCOP(val)}`}
                 ></div>
-                <div className="bar-label">{month}</div>
+                <div className="bar-label">{monthsLabels[idx]}</div>
               </div>
-            ))}
+            )) : <div className="loading-text">Cargando análisis de datos...</div>}
           </div>
           <div className="chart-legend">
             <div className="legend-item">
@@ -289,7 +244,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Ring Chart */}
         <div className="card" style={{ flex: '1 1 400px' }}>
           <div className="card-title">
             Por Categoria <span className="card-badge">Periodo</span>
@@ -298,36 +252,34 @@ export default function Dashboard() {
             <div className="ring-chart">
               <svg width="120" height="120" viewBox="0 0 120 120" id="ring-svg">
                 <circle cx="60" cy="60" r="48" fill="none" stroke="var(--bg3)" strokeWidth="13" />
-                {/* Segmentos del anillo */}
-                {ringSegments.map((segment, index) => (
-                  <circle
-                    key={index}
-                    cx="60"
-                    cy="60"
-                    r="48"
-                    fill="none"
-                    stroke={segment.color}
-                    strokeWidth="13"
-                    strokeDasharray={`${segment.segmentLength} ${circumference}`}
-                    strokeDashoffset={-segment.offset}
-                    transform="rotate(-90 60 60)" /* Inicia el dibujo desde la parte superior */
-                  />
-                ))}
+                {pythonAnalysis && pythonAnalysis.charts.categories.reduce((acc, cat, i) => {
+                  const circumference = 2 * Math.PI * 48;
+                  const pct = (cat.value / pythonAnalysis.charts.total) * 100;
+                  const len = (pct / 100) * circumference;
+                  const catInfo = categorias.find(c => c.nombre === cat.name);
+                  const color = catInfo?.color || 'var(--accent)';
+                  acc.elements.push(
+                    <circle key={i} cx="60" cy="60" r="48" fill="none" stroke={color} strokeWidth="13"
+                      strokeDasharray={`${len} ${circumference}`} strokeDashoffset={-acc.offset} transform="rotate(-90 60 60)" />
+                  );
+                  acc.offset += len;
+                  return acc;
+                }, { elements: [], offset: 0 }).elements}
               </svg>
               <div className="ring-center">
-                <div className="ring-center-val" id="ring-total">{fmtCOP(stats.totalExpenses)}</div>
+                <div className="ring-center-val">{fmtCOP(pythonAnalysis?.charts.total || 0)}</div>
                 <div className="ring-center-label">total</div>
               </div>
             </div>
             <div className="cat-list" id="cat-summary">
-              {catDistribution.slice(0, 4).map(([name, val]) => {
-                const catInfo = categorias.find(c => c.nombre === name);
+              {pythonAnalysis && pythonAnalysis.charts.categories.slice(0, 4).map((cat) => {
+                const catInfo = categorias.find(c => c.nombre === cat.name);
                 const color = catInfo?.color || 'var(--accent)';
-                const pct = stats.totalExpenses > 0 ? (val / stats.totalExpenses) * 100 : 0;
+                const pct = (cat.value / pythonAnalysis.charts.total) * 100;
                 return (
-                  <div key={name} className="cat-row">
+                  <div key={cat.name} className="cat-row">
                     <div className="cat-dot" style={{ background: color }}></div>
-                    <div className="cat-name">{name}</div>
+                    <div className="cat-name">{cat.name}</div>
                     <div className="cat-bar-wrap">
                       <div className="cat-bar-fill" style={{ background: color, width: `${pct}%` }}></div>
                     </div>
@@ -340,16 +292,51 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Transactions */}
+      <div className="charts-grid" style={{ marginTop: '2rem' }}>
+        {pythonAnalysis ? (
+          <>
+            <div className="card">
+              <div className="card-title">Insights de Ahorro (Python)</div>
+              <div className="recommendations-list">
+                {pythonAnalysis.recommendations.map((rec, i) => (
+                  <div key={i} className="recommendation-item" dangerouslySetInnerHTML={{ __html: rec.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                ))}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-title">Anomalías Detectadas</div>
+              <div className="anomalies-list">
+                {pythonAnalysis.anomalies.length > 0 ? (
+                  pythonAnalysis.anomalies.map((anom, i) => (
+                    <div key={i} className="anomaly-item">
+                      <div className="anomaly-info">
+                        <div className="anomaly-desc">{anom.descripcion}</div>
+                        <div className="anomaly-meta">{anom.fecha}</div>
+                      </div>
+                      <div className="anomaly-value">{fmtCOP(anom.valor)}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="empty-state-text">No se detectaron gastos inusuales en este periodo.</div>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="loading-text">{loadingAnalysis ? 'Analizando con Python...' : 'Esperando ejecución del motor...'}</div>
+        )}
+      </div>
+
       <div className="card">
         <div className="card-title">
           Últimas Transacciones <span className="card-badge" id="tx-count-badge">{stats.transactionCount}</span>
         </div>
         <div className="tx-list" id="recent-tx">
-          {recentTransactions.length > 0 ? (
-            recentTransactions.map(tx => (
-              <div key={tx.id} className="tx-item">
-                <div className="tx-icon">💸</div>
+          {pythonAnalysis && pythonAnalysis.charts.recent.length > 0 ? (
+            pythonAnalysis.charts.recent.map((tx, idx) => (
+              <div key={tx.id || idx} className="tx-item">
+                <div className="tx-icon">$</div>
                 <div className="tx-info">
                   <div className="tx-name">{tx.descripcion}</div>
                   <div className="tx-meta">{tx.fecha} • {tx.categoria}</div>
@@ -359,11 +346,19 @@ export default function Dashboard() {
             ))
           ) : (
             <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text3)' }}>
-              No hay transacciones registradas en este periodo.
+              No se encontraron transacciones para el periodo seleccionado.
             </div>
           )}
         </div>
       </div>
+
+      {analysisError && (
+        <div className="python-error-box" style={{ marginTop: '20px', padding: '15px', background: 'rgba(220, 38, 38, 0.1)', border: '1px solid #dc2626', borderRadius: '8px', color: 'white' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Motor de Análisis no disponible</div>
+          <div style={{ fontSize: '13px' }}>{analysisError}</div>
+          <div style={{ fontSize: '11px', opacity: 0.8, marginTop: '8px' }}>Asegúrate de ejecutar <code>python main.py</code> en la carpeta <code>Python/</code>.</div>
+        </div>
+      )}
     </div>
   );
 }

@@ -186,24 +186,6 @@ export default function LoginPage() {
     window.location.href = '/dashboard';
   };
 
-  const loginDemo = () => {
-    localStorage.removeItem('ss_session');
-    const demoUser = {
-      id: 9999,
-      nombres: 'Usuario Demo',
-      apellidos: '',
-      email: 'demo@spendsight.com',
-      avatar: 'D',
-      fechaNacimiento: '',
-      telefono: '',
-      direccion: '',
-      ciudad: '',
-      pais: 'Colombia',
-    };
-    localStorage.setItem('ss_session', JSON.stringify(demoUser));
-    window.location.href = '/dashboard';
-  };
-
   return (
     <div className="auth-body" style={{ flexDirection: 'column', justifyContent: 'flex-start', paddingTop: 0 }}>
       <div className="auth-wrap" style={{ marginTop: 'auto', marginBottom: '40px', paddingTop: '60px' }}>
@@ -264,14 +246,6 @@ export default function LoginPage() {
 
               <button className="btn-auth" onClick={handleLogin}>
                 Iniciar Sesión
-              </button>
-
-              <div className="auth-divider">
-                <span>o</span>
-              </div>
-
-              <button className="btn-auth btn-auth-ghost" onClick={loginDemo}>
-                Acceso Demo
               </button>
             </div>
           ) : (

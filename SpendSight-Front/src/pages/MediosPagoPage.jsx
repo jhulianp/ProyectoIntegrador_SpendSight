@@ -3,12 +3,6 @@ import { fmtCOP, loadStorage } from '../utils/storage';
 import { mediosPagoResource } from '../utils/resources';
 import '../Styles/categorias.css';
 
-const DEFAULT_MEDIOS = [
-  { id: 1, nombre: 'Efectivo', tipo: 'Efectivo', entidad: '', ultimosDigitos: '', color: '#34d399', estado: 'Activo', fechaCreacion: new Date().toISOString() },
-  { id: 2, nombre: 'Tarjeta Debito', tipo: 'Tarjeta debito', entidad: 'Banco', ultimosDigitos: '', color: '#60a5fa', estado: 'Activo', fechaCreacion: new Date().toISOString() },
-  { id: 3, nombre: 'Tarjeta Credito', tipo: 'Tarjeta credito', entidad: 'Banco', ultimosDigitos: '', color: '#f472b6', estado: 'Activo', fechaCreacion: new Date().toISOString() },
-  { id: 4, nombre: 'Billetera Digital', tipo: 'Billetera digital', entidad: '', ultimosDigitos: '', color: '#7c6aff', estado: 'Activo', fechaCreacion: new Date().toISOString() },
-];
 
 const COLORS = ['#7c6aff', '#60a5fa', '#34d399', '#f472b6', '#fbbf24', '#fb923c', '#f87171'];
 
@@ -48,7 +42,7 @@ export default function MediosPagoPage() {
   useEffect(() => {
     if (suffix !== null) {
       mediosPagoResource.list().then((list) => {
-        setMediosPago(list.length ? list : DEFAULT_MEDIOS);
+        setMediosPago(list);
       });
     } else {
       setMediosPago([]);

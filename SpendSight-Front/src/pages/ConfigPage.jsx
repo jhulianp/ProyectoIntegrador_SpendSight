@@ -3,9 +3,9 @@ import { fmtCOP, loadStorage, saveStorage } from '../utils/storage';
 import '../Styles/categorias.css';
 
 const DEFAULT_CONFIG = {
-  nombres: 'Usuario Demo',
+  nombres: '',
   apellidos: '',
-  correo: 'demo@spendsight.com',
+  correo: '',
   tipoDoc: 'CC',
   documento: '',
   fechaNacimiento: '',

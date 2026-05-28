@@ -5,3 +5,14 @@ credentials.json
 *.pem
 *.key
 .credentials
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+
+# Data folders (ignore processed files but keep folder structure)
+data/processed/*
+!data/processed/.gitkeep

@@ -26,7 +26,8 @@ export default function Layout() {
   const navigate = useNavigate();
   const title = titleMap[location.pathname] || 'SpendSight';
   const session = JSON.parse(localStorage.getItem('ss_session') || 'null');
-  const userName = session?.nombres || session?.email || 'Usuario Demo';
+  const userName = session?.nombres || session?.email || 'Usuario';
+  const initials = session?.avatar || (userName[0] || 'U').toUpperCase();
 
   return (
     <>
@@ -74,7 +75,7 @@ export default function Layout() {
             </span>
             <span className="topbar-username">{userName}</span>
             <NavLink className="avatar" to="/config" title="Mi cuenta">
-              SS
+              {initials}
             </NavLink>
             <button className="btn btn-ghost btn-sm" onClick={() => {
               localStorage.removeItem('ss_session');

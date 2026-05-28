@@ -33,7 +33,7 @@ export async function apiCall(path, { method = 'GET', body, silent = false } = {
         errMsg = errBody.message || errBody.error || errMsg;
       } catch (_) { /* respuesta no-JSON */ }
       if (!silent) {
-        notify({ message: `⚠ Backend: ${errMsg}`, variant: 'error' });
+        notify({ message: `Backend: ${errMsg}`, variant: 'error' });
       }
       return { ok: false, status: res.status, error: errMsg };
     }
@@ -52,7 +52,7 @@ export async function apiCall(path, { method = 'GET', body, silent = false } = {
     if (!silent && !backendDownNotified) {
       backendDownNotified = true;
       notify({
-        message: '⚠ Backend no disponible — trabajando con datos locales',
+        message: 'Backend no disponible — trabajando con datos locales',
         variant: 'warning',
         timeout: 5000,
       });

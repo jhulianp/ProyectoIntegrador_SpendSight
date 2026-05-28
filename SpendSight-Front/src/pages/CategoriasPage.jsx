@@ -5,11 +5,6 @@ import '../Styles/categorias.css';
 
 const DEFAULT_COLORS = ['#7c6aff', '#f472b6', '#60a5fa', '#34d399', '#fb923c', '#fbbf24', '#f97316'];
 const DEFAULT_ICONS = ['F', 'T', 'P', 'M', 'S', 'B', 'C', 'D', 'R', 'L', 'A', 'H'];
-const DEFAULT_CATEGORIES = [
-  { id: 1, nombre: 'Alimentacion', tipo: 'Gasto', icono: 'F', color: '#7c6aff', estado: 'Activo', fechaCreacion: new Date().toISOString() },
-  { id: 2, nombre: 'Transporte', tipo: 'Gasto', icono: 'T', color: '#60a5fa', estado: 'Activo', fechaCreacion: new Date().toISOString() },
-  { id: 3, nombre: 'Salud', tipo: 'Gasto', icono: 'S', color: '#34d399', estado: 'Activo', fechaCreacion: new Date().toISOString() },
-];
 
 const EMPTY_FORM = {
   id: null,
@@ -35,11 +30,7 @@ export default function CategoriasPage() {
     if (suffix !== null) {
       // Cargar desde el back (con fallback a localStorage automático en categoriasResource)
       categoriasResource.list().then((list) => {
-        if (list.length) {
-          setCategories(list);
-        } else {
-          setCategories(DEFAULT_CATEGORIES);
-        }
+        setCategories(list);
       });
     } else setCategories([]); // Clear if no session
   }, [suffix]);

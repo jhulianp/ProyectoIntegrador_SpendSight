@@ -311,9 +311,20 @@ function mapEstadoGastoBEtoFE(estadoBE) {
 
 function gastoFEtoBE(g, ctx) {
   // ctx: { categorias, comercios, mediosPago, session }
-  const cat = ctx.categorias.find((c) => c.nombre === g.categoria);
-  const med = ctx.mediosPago.find((m) => m.nombre === g.medioPago);
-  const com = ctx.comercios.find((c) => c.nombre === g.comercio);
+  // Normalizar nombres para una comparación robusta (insensible a mayúsculas/minúsculas y espacios)
+  const normalizedCategoriaName = g.categoria ? String(g.categoria).trim().toLowerCase() : null;
+  const normalizedMedioPagoName = g.medioPago ? String(g.medioPago).trim().toLowerCase() : null;
+  const normalizedComercioName = g.comercio ? String(g.comercio).trim().toLowerCase() : null;
+
+  const cat = normalizedCategoriaName
+    ? ctx.categorias.find((c) => String(c.nombre).trim().toLowerCase() === normalizedCategoriaName)
+    : null;
+  const med = normalizedMedioPagoName
+    ? ctx.mediosPago.find((m) => String(m.nombre).trim().toLowerCase() === normalizedMedioPagoName)
+    : null;
+  const com = normalizedComercioName
+    ? ctx.comercios.find((c) => String(c.nombre).trim().toLowerCase() === normalizedComercioName)
+    : null;
 
   return {
     id: g.id ?? randomIntId(),

@@ -70,42 +70,19 @@ export default function Gastos() {
       comerciosResource.list(),
     ]);
 
-    const defaultCats = [
-      { id: 'Comida', nombre: 'Comida' },
-      { id: 'Transporte', nombre: 'Transporte' },
-      { id: 'Entretenimiento', nombre: 'Entretenimiento' },
-      { id: 'Servicios', nombre: 'Servicios' },
-      { id: 'Otros', nombre: 'Otros' }
-    ];
-    const defaultPayments = [
-      { id: 'Efectivo', nombre: 'Efectivo' },
-      { id: 'Tarjeta Débito', nombre: 'Tarjeta Débito' },
-      { id: 'Tarjeta Crédito', nombre: 'Tarjeta Crédito' },
-      { id: 'Billetera Digital', nombre: 'Billetera Digital' }
-    ];
-
-    const categoriasFinales = cats.length > 0 ? cats : defaultCats;
-    const mediosFinales = meds.length > 0 ? meds : defaultPayments;
-
-    setCategorias(categoriasFinales);
-    setMediosPago(mediosFinales);
+    setCategorias(cats);
+    setMediosPago(meds);
     setComerciosData(coms);
 
     // Ahora cargar los gastos usando las entidades como contexto para resolver FKs
     const gastosBack = await gastosResource.list({
-      categorias: categoriasFinales,
-      mediosPago: mediosFinales,
+      categorias: cats,
+      mediosPago: meds,
       comercios: coms,
       session: JSON.parse(localStorage.getItem('ss_session') || 'null'),
     });
 
-    const sanitizedGastos = gastosBack.map(g => ({
-      ...g,
-      categoria: typeof g.categoria === 'object' && g.categoria !== null ? (g.categoria.nombre || '') : String(g.categoria || ''),
-      medioPago: typeof g.medioPago === 'object' && g.medioPago !== null ? (g.medioPago.nombre || '') : String(g.medioPago || ''),
-      comercio: typeof g.comercio === 'object' && g.comercio !== null ? (g.comercio.nombre || '') : String(g.comercio || '')
-    }));
-    setGastos(sanitizedGastos);
+    setGastos(gastosBack);
   };
 
   const resetData = () => {
@@ -145,41 +122,54 @@ export default function Gastos() {
   };
 
   const handleFormChange = (field, value) => {
-    // Aseguramos que si el valor es un objeto, guardamos solo el nombre/texto
-    const safeValue = (typeof value === 'object' && value !== null) ? (value.nombre || value.id || String(value)) : value;
-    setFormData({ ...formData, [field]: safeValue });
+    setFormData({ ...formData, [field]: value });
   };
 
   const handleSaveGasto = async () => {
-    if (!formData.descripcion || !formData.valor || !formData.categoria || !formData.medioPago) {
-      alert('Por favor completa los campos requeridos');
+    const desc = (formData.descripcion || '').trim();
+    const valor = parseFloat(String(formData.valor));
+    const fecha = formData.fecha;
+
+    if (!desc || isNaN(valor) || !fecha) {
+      alert('Por favor completa los campos obligatorios: Descripción, Valor y Fecha');
       return;
     }
 
-    const valorNumerico = parseFloat(formData.valor) || 0;
-    const gastoToSave = { ...formData, valor: valorNumerico, id: editingId || formData.id };
+    const currentSession = JSON.parse(localStorage.getItem('ss_session') || 'null');
+    if (!currentSession || !currentSession.id) {
+      alert('Tu sesión ha expirado. Por favor, inicia sesión de nuevo.');
+      return;
+    }
+
+    // Guardar nuevo comercio si no existe en la lista (antes de guardar el gasto para poder asociarlo)
+    let updatedComercios = [...comercios];
+    if (formData.comercio && !comercios.some(c => c.nombre.toLowerCase() === formData.comercio.trim().toLowerCase())) {
+      const nuevoComercio = await comerciosResource.save({ nombre: formData.comercio.trim(), tipo: 'Comercio' });
+      updatedComercios = [...updatedComercios, nuevoComercio];
+      setComerciosData(updatedComercios);
+    }
+
     const ctx = {
       categorias,
       mediosPago,
-      comercios,
-      session: JSON.parse(localStorage.getItem('ss_session') || 'null'),
+      comercios: updatedComercios,
+      session: currentSession,
+    };
+
+    // Preparamos el objeto. resources.js se encarga de convertir nombres a objetos con ID para el backend.
+    const gastoToSave = {
+      ...formData,
+      descripcion: desc,
+      valor: valor,
+      fecha: fecha,
     };
 
     const saved = await gastosResource.save(gastoToSave, ctx);
 
-    let updatedGastos;
     if (editingId) {
-      updatedGastos = gastos.map(g => g.id === editingId ? { ...saved, id: editingId } : g);
+      setGastos(gastos.map(g => g.id === editingId ? saved : g));
     } else {
-      updatedGastos = [...gastos, saved];
-    }
-    setGastos(updatedGastos);
-
-    // Guardar nuevo comercio si no existe en la lista (también en backend)
-    if (saved.comercio && typeof saved.comercio === 'string' && saved.comercio.trim() !== '' && !comercios.some(c => (c.nombre || c) === saved.comercio)) {
-      const nuevoComercio = await comerciosResource.save({ nombre: saved.comercio, tipo: 'Comercio' });
-      const newComercios = [...comercios, nuevoComercio];
-      setComerciosData(newComercios);
+      setGastos([...gastos, saved]);
     }
 
     setShowModal(false);
@@ -224,7 +214,7 @@ export default function Gastos() {
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn btn-ghost" onClick={handleResetApp} style={{ fontSize: '12px' }}>
-            ⚠ Limpiar Datos
+            Limpiar Datos
           </button>
           <button className="btn btn-primary" onClick={() => handleOpenModal()}>
             + Nuevo gasto
@@ -310,13 +300,13 @@ export default function Gastos() {
                   <td>
                     <div className="actions">
                       <button className="btn btn-sm btn-ghost" onClick={() => handleViewDetail(gasto)} title="Ver">
-                        👁️
+                        Ver
                       </button>
                       <button className="btn btn-sm btn-ghost" onClick={() => handleOpenModal(gasto)} title="Editar">
-                        ✎
+                        Editar
                       </button>
                       <button className="btn btn-sm btn-danger" onClick={() => handleDeleteGasto(gasto)} title="Eliminar">
-                        🗑️
+                        Borrar
                       </button>
                     </div>
                   </td>
@@ -339,7 +329,7 @@ export default function Gastos() {
           <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
             <div className="modal-title">
               <span>{modalTitle}</span>
-              <button className="modal-close" onClick={() => handleCloseModal()}>✕</button>
+              <button className="modal-close" onClick={() => handleCloseModal()}>X</button>
             </div>
             <div className="form-row">
               <div className="form-group" style={{ gridColumn: '1/-1' }}>
@@ -376,13 +366,13 @@ export default function Gastos() {
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Categoria *</label>
+                <label className="form-label">Categoria (Opcional)</label>
                 <select
                   className="form-select"
                   value={formData.categoria}
                   onChange={(e) => handleFormChange('categoria', e.target.value)}
                 >
-                  <option value="">Selecciona una categoría</option>
+                  <option value="">Sin categoría</option>
                   {categorias.map((cat, i) => (
                     <option key={cat.id || i} value={cat.nombre || cat}>
                       {String(cat.nombre || cat)}
@@ -391,13 +381,13 @@ export default function Gastos() {
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Medio de Pago *</label>
+                <label className="form-label">Medio de Pago (Opcional)</label>
                 <select
                   className="form-select"
                   value={formData.medioPago}
                   onChange={(e) => handleFormChange('medioPago', e.target.value)}
                 >
-                  <option value="">Selecciona un medio de pago</option>
+                  <option value="">Sin medio de pago</option>
                   {mediosPago.map((mp, i) => (
                     <option key={mp.id || i} value={mp.nombre || mp}>
                       {String(mp.nombre || mp)}
@@ -408,7 +398,7 @@ export default function Gastos() {
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Comercio (Escribe o selecciona)</label>
+                <label className="form-label">Comercio (Opcional)</label>
                 <input
                   className="form-input"
                   list="comercios-list"
@@ -457,7 +447,7 @@ export default function Gastos() {
           <div className="detail-panel" onClick={(e) => e.stopPropagation()}>
             <div className="detail-header">
               <h3>{detailGasto.descripcion}</h3>
-              <button className="detail-close" onClick={() => setShowDetail(false)}>✕</button>
+              <button className="detail-close" onClick={() => setShowDetail(false)}>X</button>
             </div>
             <div className="detail-body">
               <div className="detail-row">

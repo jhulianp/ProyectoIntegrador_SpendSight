@@ -5,37 +5,37 @@ import Footer from '../components/Footer.jsx';
 
 const features = [
   {
-    icon: '📊',
+    icon: 'DS',
     color: 'rgba(124,106,255,.15)',
     title: 'Dashboard en tiempo real',
     desc: 'Visualiza tus gastos con gráficas interactivas. Barras mensuales, distribución por categoría y tendencias al instante.',
   },
   {
-    icon: '🏷️',
+    icon: 'CA',
     color: 'rgba(248,113,113,.12)',
     title: 'Categorías personalizadas',
     desc: 'Organiza tus gastos con categorías de colores e íconos propios. Filtra, agrupa y entiende en qué va tu dinero.',
   },
   {
-    icon: '🏪',
+    icon: 'CO',
     color: 'rgba(52,211,153,.12)',
     title: 'Gestión de comercios',
     desc: 'Registra tiendas y proveedores. Consulta cuánto has gastado en cada comercio a lo largo del tiempo.',
   },
   {
-    icon: '💳',
+    icon: 'MP',
     color: 'rgba(96,165,250,.12)',
     title: 'Múltiples medios de pago',
     desc: 'Lleva el control por tarjeta, efectivo o billetera digital. Sabe exactamente cómo se distribuyen tus pagos.',
   },
   {
-    icon: '🎯',
+    icon: 'PR',
     color: 'rgba(251,191,36,.12)',
     title: 'Presupuesto mensual',
     desc: 'Establece un límite y monitorea tu saldo disponible en todo momento. Recibe alertas antes de excederte.',
   },
   {
-    icon: '🔒',
+    icon: 'PV',
     color: 'rgba(244,114,182,.12)',
     title: 'Privacidad total',
     desc: 'Tus datos se almacenan localmente en tu dispositivo. Sin servidores externos, sin rastreo, sin sorpresas.',
@@ -82,7 +82,7 @@ export default function LandingPage() {
           <div className="land-nav-cta">
             <button className="land-btn-ghost" onClick={goToLogin}>Iniciar sesión</button>
             <button className="land-btn-primary" onClick={goToRegister}>
-              Crear cuenta <span style={{ fontSize: '16px', lineHeight: 1 }}>→</span>
+              Crear cuenta
             </button>
           </div>
         </nav>
@@ -107,11 +107,7 @@ export default function LandingPage() {
           <div className="land-hero-actions">
             <button className="land-hero-btn-primary" onClick={goToRegister}>
               <span>Comenzar gratis</span>
-              <span style={{ fontSize: '18px', lineHeight: 1 }}>→</span>
-            </button>
-            <button className="land-hero-btn-ghost" onClick={goToLogin}>
-              <span style={{ fontSize: '16px' }}>▶</span>
-              Acceso demo
+              <span style={{ marginLeft: '8px' }}></span>
             </button>
           </div>
 
@@ -279,7 +275,7 @@ export default function LandingPage() {
             </p>
             <div className="land-cta-actions">
               <button className="land-hero-btn-primary" onClick={goToRegister}>
-                Crear cuenta gratis <span style={{ fontSize: '18px' }}>→</span>
+                Crear cuenta gratis
               </button>
               <button className="land-hero-btn-ghost" onClick={goToLogin}>
                 Ya tengo cuenta
