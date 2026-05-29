@@ -79,6 +79,7 @@ def generar_estadisticas_dashboard(df):
 def exportar_reporte_csv(df, nombre_salida):
     """Guarda el DataFrame procesado en data/processed."""
     ruta = os.path.join('..', 'data', 'processed', nombre_salida)
+    os.makedirs(os.path.dirname(ruta), exist_ok=True)
     df.to_csv(ruta, index=False)
 
 # --- Nuevas funciones de análisis ---
@@ -153,6 +154,122 @@ def analizar_gastos_limpios(df_Gastos_Limpios):
     if 'notas' in df_Gastos_Limpios.columns:
         print("\nAnálisis de notas:")
         print(df_Gastos_Limpios["notas"].value_counts())
+
+def analizar_pagos_limpios(df_pagos):
+    print("\n" + "=" * 50)
+    print("===== ANALISIS DE PAGOS LIMPIOS =====")
+    print("=" * 50)
+
+    total = len(df_pagos)
+    print(f"\nTotal registros: {total}")
+    if total == 0:
+        print("No hay pagos para analizar.")
+        return
+
+    if 'estado' in df_pagos.columns:
+        print("\nDistribucion por estado:")
+        print(df_pagos['estado'].value_counts())
+
+    if 'metodo_pago' in df_pagos.columns:
+        print("\nDistribucion por metodo de pago:")
+        print(df_pagos['metodo_pago'].value_counts())
+
+    if 'monto' in df_pagos.columns:
+        print(f"\nMonto total: ${df_pagos['monto'].sum():,.2f}")
+        print(f"Monto promedio: ${df_pagos['monto'].mean():,.2f}")
+        print(f"Monto maximo: ${df_pagos['monto'].max():,.2f}")
+        print(f"Monto minimo: ${df_pagos['monto'].min():,.2f}")
+
+    if 'producto' in df_pagos.columns:
+        print("\nTop 5 productos mas frecuentes:")
+        print(df_pagos['producto'].value_counts().head())
+
+    if 'metodo_pago' in df_pagos.columns and 'monto' in df_pagos.columns:
+        print("\nMonto total y promedio por metodo de pago:")
+        agrupacion = df_pagos.groupby('metodo_pago').agg({
+            'monto': ['sum', 'mean', 'count']
+        }).round(2)
+        agrupacion.columns = ['Monto Total', 'Monto Promedio', 'Cantidad']
+        print(agrupacion.to_string())
+
+        pagos_altos = df_pagos[df_pagos['monto'] > 5000]
+        print(f"\nPagos con monto mayor a $5,000: {len(pagos_altos)}")
+        print(f"Monto total de pagos altos: ${pagos_altos['monto'].sum():,.2f}")
+
+def generar_estadisticas_pagos_dashboard(df_pagos):
+    """Calcula metricas de pagos listas para consumir desde React o Flask."""
+    df_pagos = df_pagos.copy()
+    if df_pagos.empty:
+        return {
+            "charts": {
+                "paymentMethods": [],
+                "status": [],
+                "monthly": [],
+                "topProducts": [],
+                "total": 0.0,
+                "count": 0
+            },
+            "summary": {
+                "average": 0.0,
+                "max": 0.0,
+                "min": 0.0,
+                "highPayments": 0
+            }
+        }
+
+    if 'fecha' in df_pagos.columns:
+        df_pagos['fecha'] = pd.to_datetime(df_pagos['fecha'], errors='coerce')
+    else:
+        df_pagos['fecha'] = pd.NaT
+
+    if 'monto' in df_pagos.columns:
+        df_pagos['monto'] = pd.to_numeric(df_pagos['monto'], errors='coerce').fillna(0)
+    else:
+        df_pagos['monto'] = 0
+
+    metodos = (
+        df_pagos.groupby('metodo_pago')['monto'].sum().sort_values(ascending=False)
+        if 'metodo_pago' in df_pagos.columns else pd.Series(dtype=float)
+    )
+    estados = (
+        df_pagos['estado'].value_counts()
+        if 'estado' in df_pagos.columns else pd.Series(dtype=int)
+    )
+    productos = (
+        df_pagos['producto'].value_counts().head(5)
+        if 'producto' in df_pagos.columns else pd.Series(dtype=int)
+    )
+
+    df_fechas = df_pagos.dropna(subset=['fecha'])
+    if not df_fechas.empty:
+        current_year = df_fechas['fecha'].dt.year.max()
+        df_year = df_fechas[df_fechas['fecha'].dt.year == current_year]
+        monthly = (
+            df_year
+            .groupby(df_year['fecha'].dt.month)['monto']
+            .sum()
+            .reindex(range(1, 13), fill_value=0)
+            .tolist()
+        )
+    else:
+        monthly = [0] * 12
+
+    return {
+        "charts": {
+            "paymentMethods": [{"name": str(k), "value": float(v)} for k, v in metodos.items()],
+            "status": [{"name": str(k), "value": int(v)} for k, v in estados.items()],
+            "monthly": [float(v) for v in monthly],
+            "topProducts": [{"name": str(k), "value": int(v)} for k, v in productos.items()],
+            "total": float(df_pagos['monto'].sum()),
+            "count": int(len(df_pagos))
+        },
+        "summary": {
+            "average": float(df_pagos['monto'].mean()),
+            "max": float(df_pagos['monto'].max()),
+            "min": float(df_pagos['monto'].min()),
+            "highPayments": int((df_pagos['monto'] > 5000).sum())
+        }
+    }
 
 def analizar_usuarios_limpios(df_Usuarios_Limpios):
     print("\n" + "=" * 55)

@@ -44,6 +44,24 @@ def Cargar_Gastos_Limpios():
     return pd.DataFrame()
 
 
+#carga de Pagos Sucios y Limpios--------------------------------------------------------------------------------------
+def cargar_pagos():
+    ruta = os.path.join('..', 'data', 'row', 'pagos_sucios.csv')
+    if os.path.exists(ruta):
+        df_pagos = pd.read_csv(ruta)
+        df_pagos.info()
+        return df_pagos
+    return pd.DataFrame()
+
+def Cargar_Pagos_Limpios():
+    ruta = os.path.join('..', 'data', 'processed', 'pagos_limpio.csv')
+    if os.path.exists(ruta):
+        df_pagos_limpios = pd.read_csv(ruta)
+        df_pagos_limpios.info()
+        return df_pagos_limpios
+    return pd.DataFrame()
+
+
 #carga de Usuarios Sucios y Limpios--------------------------------------------------------------------------------------
 def cargar_Usuarios():
     ruta = os.path.join('..', 'data', 'row', 'Usuarios_Sucios.csv')

@@ -195,6 +195,104 @@ def limpiar_datos_gastos(df_Gastos):
     
     return df_Gastos
 
+# Funcion de limpieza para Pagos Sucios--------------------------------------------------------------------------------------
+def limpiar_datos_pagos(df_pagos):
+    print("Limpiando datos de Pagos...")
+
+    df_pagos = df_pagos.copy()
+    if df_pagos.empty:
+        print("No hay datos de Pagos para limpiar.")
+        return df_pagos
+
+    # Normalizar nombres frecuentes para que acepte archivos viejos o exportes nuevos.
+    column_map = {
+        'metodoPago': 'metodo_pago',
+        'medioPago': 'metodo_pago',
+        'medio_pago': 'metodo_pago',
+        'valor': 'monto',
+        'amount': 'monto',
+        'date': 'fecha',
+        'descripcion': 'producto',
+    }
+    df_pagos = df_pagos.rename(columns={col: column_map.get(col, col) for col in df_pagos.columns})
+
+    print(f"Cantidad de registros antes de eliminar duplicados: {len(df_pagos)}")
+    df_pagos = df_pagos.drop_duplicates()
+    print(f"Cantidad de registros despues de eliminar duplicados: {len(df_pagos)}")
+
+    print("Limpiando espacios en blanco y estandarizando texto")
+    for col in ['metodo_pago', 'estado', 'producto']:
+        if col in df_pagos.columns:
+            df_pagos[col] = df_pagos[col].astype(str).str.strip().str.title()
+
+    print("Limpiando monto")
+    if 'monto' in df_pagos.columns:
+        df_pagos['monto'] = (
+            df_pagos['monto']
+            .astype(str)
+            .str.strip()
+            .replace(r'(?i)[$,]|cop', '', regex=True)
+        )
+        df_pagos['monto'] = pd.to_numeric(df_pagos['monto'], errors='coerce')
+    else:
+        df_pagos['monto'] = 0
+
+    print("Convirtiendo fecha a formato datetime")
+    if 'fecha' in df_pagos.columns:
+        df_pagos['fecha'] = pd.to_datetime(df_pagos['fecha'], errors='coerce')
+    else:
+        df_pagos['fecha'] = pd.Timestamp('2024-01-01')
+
+    print("Estandarizando estado")
+    if 'estado' in df_pagos.columns:
+        df_pagos['estado'] = df_pagos['estado'].replace({
+            'Completado': 'Completado',
+            'Completo': 'Completado',
+            'Aprobado': 'Completado',
+            'Fallido': 'Fallido',
+            'Rechazado': 'Fallido',
+            'Pendiente': 'Pendiente',
+        })
+    else:
+        df_pagos['estado'] = 'Desconocido'
+
+    print("Estandarizando metodo de pago")
+    if 'metodo_pago' in df_pagos.columns:
+        df_pagos['metodo_pago'] = df_pagos['metodo_pago'].replace({
+            'Tarjeta Credito': 'Tarjeta',
+            'Tarjeta De Credito': 'Tarjeta',
+            'Tarjeta Debito': 'Tarjeta',
+            'Tarjeta De Debito': 'Tarjeta',
+            'Transferencia Bancaria': 'Transferencia',
+        })
+    else:
+        df_pagos['metodo_pago'] = 'Desconocido'
+
+    print("Tratamiento de nulos")
+    df_pagos['metodo_pago'] = df_pagos['metodo_pago'].replace('', 'Desconocido').fillna('Desconocido')
+    df_pagos['monto'] = df_pagos['monto'].fillna(0)
+    df_pagos['estado'] = df_pagos['estado'].replace('', 'Desconocido').fillna('Desconocido')
+    df_pagos['fecha'] = df_pagos['fecha'].fillna(pd.Timestamp('2024-01-01'))
+
+    if 'producto' in df_pagos.columns:
+        df_pagos['producto'] = df_pagos['producto'].replace('', 'Sin Producto').fillna('Sin Producto')
+    else:
+        df_pagos['producto'] = 'Sin Producto'
+
+    print("Verificacion de estados logicos")
+    estados_validos = ['Completado', 'Fallido', 'Pendiente', 'Desconocido']
+    errores_pagos = df_pagos[~df_pagos['estado'].isin(estados_validos)]
+    if not errores_pagos.empty:
+        print("Pagos con estados que no estan en la lista esperada:")
+        print(errores_pagos[['metodo_pago', 'monto', 'estado']])
+    else:
+        print("No se detectaron estados invalidos en Pagos.")
+
+    df_pagos['fecha'] = df_pagos['fecha'].dt.strftime('%Y-%m-%d')
+
+    print("Limpieza de Pagos completada en memoria.")
+    return df_pagos
+
 # Función de limpieza para Usuarios Sucios--------------------------------------------------------------------------------------
 def limpiar_datos_usuarios(df_Usuarios):
     print("Limpiando datos de Usuarios...")
